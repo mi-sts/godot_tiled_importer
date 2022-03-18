@@ -2,5 +2,5 @@ using System;
 
 public abstract class Decoder 
 {
-    public abstract string Decode(string encodedString);
+    public abstract LayerData Decode(string encodedString);
 }

@@ -4,9 +4,27 @@ using System.Text;
 
 public class Base64Decoder : Decoder
 {
-    public override string Decode(string encodedString)
+    public byte[] DecodeToBytes(string encodedString)
     {
-        byte[] bytesData = Convert.FromBase64String(encodedString);
-        return Encoding.UTF8.GetString(bytesData);
+        if (encodedString == null) {
+            GD.PrintErr("Decoding string are empty!");
+            return null;
+        }
+
+        byte[] bytesData;
+        try {
+            bytesData = Convert.FromBase64String(encodedString);
+        }
+        catch (FormatException) {
+            GD.PrintErr("String format not suitable for base64 decoding!");
+            return null;
+        }
+
+        return bytesData;
+    }
+
+    public override LayerData Decode(string encodedString)
+    {
+        throw new NotImplementedException();
     }
 }
