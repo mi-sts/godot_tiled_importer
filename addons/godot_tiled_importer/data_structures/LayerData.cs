@@ -7,47 +7,26 @@ public class LayerData
     private int mapWidth = 0;
     private int mapHeight = 0;
 
-    public LayerData(int mapWidth, int mapHeight, uint[] mapGIDs, bool[][] flipFlags) {
+    public LayerData(TileData[,] tiles, int mapWidth, int mapHeight) {
         if (mapWidth <= 0 || mapHeight <= 0) {
-            GD.PrintErr("Incorrect size of the map!");
+            GD.PushError("Incorrect size of the map!");
             return;
         }
-        if (mapGIDs.Length != mapHeight * mapWidth) {
-            GD.PrintErr("Count of tiles doesn't math the size of the map!");
+        if (tiles.GetLength(0) != mapHeight || tiles.GetLength(1) != mapWidth) {
+            GD.PushError("Number of tiles doesn't math the size of the map!");
             return;
         }
-        if (flipFlags.Length != mapHeight * mapWidth) {
-            GD.PrintErr("Count of tile flags doesn't math the size of the map!");
-            return;
-        }
-
-        this.mapHeight = mapHeight;
-        this.mapWidth = mapWidth;
-        tiles = new TileData[mapHeight, mapWidth];
         
-        for (int y = 0; y < mapHeight; ++y) {
-            for (int x = 0; x < mapWidth; ++x) {
-                int tileIndex = y * mapWidth + x;
-
-                bool[] tileFlags = flipFlags[tileIndex];
-                bool horizontallyFlipped = tileFlags[0];
-                bool verticallyFlipped = tileFlags[1];
-                bool diagonallyFlipped = tileFlags[2];
-                bool rotated120 = tileFlags[3]; // Considered only for hexagonal maps.
-
-                tiles[y, x] = new TileData(
-                    mapGIDs[tileIndex], new Vector2(x, y), horizontallyFlipped, verticallyFlipped, 
-                    diagonallyFlipped, rotated120
-                    );
-            }
-        }
+        this.tiles = tiles;
+        this.mapWidth = mapWidth;
+        this.mapHeight = mapHeight;
     }
 
     public TileData this[int x, int y] 
     {
         get {
             if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) {
-                GD.PrintErr("Tile position index is out of range!");
+                GD.PushError("Tile position index is out of range!");
                 return TileData.EMPTY;
             }
             
@@ -59,9 +38,9 @@ public class LayerData
     {
         string strRepresentation = "";
 
-        for (int x = 0; x < mapWidth; ++x) {
+        for (int y = 0; y < mapWidth; ++y) {
             strRepresentation += "| ";
-            for (int y = 0; y < mapHeight; ++y)
+            for (int x = 0; x < mapHeight; ++x)
                 strRepresentation += this[x, y].GID + " | ";
             strRepresentation += "\n";
         }
