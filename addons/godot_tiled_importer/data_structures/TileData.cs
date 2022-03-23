@@ -1,17 +1,18 @@
 using Godot;
 using System;
 
+// Сontains information about the tile that was parsed from the data field of the layer.
 public struct TileData 
 {
     public static TileData EMPTY = new TileData(0, Vector2.Zero, false, false, false);
-    public uint GID;
-    public Vector2 position;
-    public bool horizontallyFlipped;
-    public bool verticallyFlipped;
+    public uint GID { get; private set; }
+    public Vector2 position { get; private set; }
+    public bool horizontallyFlipped { get; private set; }
+    public bool verticallyFlipped { get; private set;}
     // In hexagonal maps it indicates whether the tile is rotated 60 degrees clockwise.
-    public bool diagonallyFlipped;
+    public bool diagonallyFlipped { get; private set; }
     // Only for hexagonal tiles;
-    public bool rotated120;
+    public bool rotated120 { get; private set; }
 
     public TileData(
         uint GID, Vector2 position, bool horizontallyFlipped, bool verticallyFlipped, bool diagonallyFlipped

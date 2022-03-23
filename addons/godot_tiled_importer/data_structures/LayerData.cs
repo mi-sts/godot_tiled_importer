@@ -1,11 +1,12 @@
 using Godot;
 using System;
 
+// Сontains information about the layer that was parsed from the data field.
 public class LayerData 
 {
-    private TileData[,] tiles;
-    private int mapWidth = 0;
-    private int mapHeight = 0;
+    public TileData[,] tiles;
+    public int mapWidth { get; private set; }
+    public int mapHeight { get; private set; }
 
     public LayerData(TileData[,] tiles, int mapWidth, int mapHeight) {
         if (mapWidth <= 0 || mapHeight <= 0) {

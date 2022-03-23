@@ -8,7 +8,6 @@ project.godot
 
 # Mono-specific ignores
 .mono/
-data_*/
 
 # VS-specific ignores
 *.sln
