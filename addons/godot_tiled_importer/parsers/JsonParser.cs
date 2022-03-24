@@ -2,8 +2,7 @@ using Godot;
 using System;
 
 public abstract class JsonParser : Parser {
-    public override MapData Parse(string data)
+    public override Map Parse(string data)
     {
-        
     }
 }
