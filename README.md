@@ -1,1 +1,1 @@
-## The plugin is currently under development and does not work.
+## The plugin is under development and currently does not work.
