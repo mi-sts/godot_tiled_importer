@@ -17,7 +17,7 @@ public struct ObjectInfo {
 public class Object 
 {
     public string name { get; private set; }
-    public int? id { get; private set; } 
+    public int id { get; private set; } 
     public Point coordinates { get; private set; }
     public double width { get; private set; }
     public double height { get; private set; }
@@ -38,13 +38,12 @@ public class Object
             objectInfo.type,
             objectInfo.visible
         };
-        if (requiredParameters.Any(argument => argument == null)) {
+        if (requiredParameters.Any(parameter => parameter == null)) {
             GD.PushError("Not all of the required tile parameters are initialized!");
-            return;
         }
 
-        name = objectInfo.name;
-        id = objectInfo.id;
+        name = objectInfo.name ?? "";
+        id = objectInfo.id ?? -1;
         coordinates = objectInfo.coordinates;
         width = objectInfo.width ?? 0;
         height = objectInfo.height ?? 0;

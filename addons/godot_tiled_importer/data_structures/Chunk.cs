@@ -10,7 +10,10 @@ public struct Chunk
     public Point position { get; private set; }
 
     public Chunk(uint[] data, int width, int height, Point position) {
-        this.data = data;
+        if (data == null) {
+            GD.PushError("Data of the chunk are not initialized!");
+        }
+        this.data = data ?? new uint[0];
         this.width = width;
         this.height = height;
         this.position = position;

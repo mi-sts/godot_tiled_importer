@@ -8,7 +8,10 @@ public struct Terrain
     public int tile { get; private set; }
 
     public Terrain(string name, Property[] properties, int tile) {
-        this.name = name;
+        if (name == null) {
+            GD.PushError("Name of the terrain is not initialized!");
+        }
+        this.name = name ?? "";
         this.properties = properties;
         this.tile = tile;
     }

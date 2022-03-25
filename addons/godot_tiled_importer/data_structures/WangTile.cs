@@ -10,10 +10,8 @@ public struct WangTile
     public WangTile(int tileID, ushort[] wangID) {
         if (wangID == null) {
             GD.PushError("Indexes of the wang tile not initialized!");
-            this = NullWangTile;
-            return;
         }
         this.tileID = tileID;
-        this.wangID = wangID;
+        this.wangID = wangID ?? new ushort[0];
     }
 }

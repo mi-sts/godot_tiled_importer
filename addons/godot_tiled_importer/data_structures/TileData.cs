@@ -16,7 +16,7 @@ public struct TileData
 
     public TileData(
         uint GID, Vector2 position, bool horizontallyFlipped, bool verticallyFlipped, bool diagonallyFlipped
-        ){
+        ) {
         this.GID = GID;
         this.position = position;
         this.horizontallyFlipped = horizontallyFlipped;

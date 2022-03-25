@@ -8,15 +8,6 @@ public enum WangSetType {
 
 public struct WangSet 
 {
-    public static WangSet NullWangSet = new WangSet() {
-        name = "",
-        wangTiles = new WangTile[0],
-        colors = new WangColor[0],
-        tileID = -1,
-        properties = new Property[0],
-        type = WangSetType.Corner
-    };
-
     public string name { get; private set; }
     public WangTile[] wangTiles { get; private set; }
     public WangColor[] colors { get; private set; }
@@ -34,14 +25,12 @@ public struct WangSet
         };
         if (requiredParameters.Any(argument => argument == null)) {
             GD.PushError("Not all of the required tile parameters are initialized!");
-            this = NullWangSet;
-            return;
         }
-        this.name = name;
-        this.wangTiles = wangTiles;
-        this.colors = colors;
+        this.name = name ?? "";
+        this.wangTiles = wangTiles ?? new WangTile[0];
+        this.colors = colors ?? new WangColor[0];
         this.tileID = tileID;
-        this.properties = properties;
+        this.properties = properties ?? new Property[0];
         this.type = type;
     }
 }

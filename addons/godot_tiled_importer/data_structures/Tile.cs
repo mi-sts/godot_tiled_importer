@@ -10,20 +10,13 @@ public struct TileInfo {
     public Property[] properties;
     public string image;
     public Layer objectGroup;
-    public double probability;
+    public double? probability;
     public Terrain[] terrain;
     public Frame[] animation;
 }
 
 public struct Tile 
 {
-    public static Tile NullTile = new Tile(new TileInfo() {
-        id = -1,
-        imageWidth = 0,
-        imageHeight = 0,
-        properties = new Property[0]
-    } );
-    
     public int id { get; private set; }
     public int imageWidth { get; private set; }
     public int imageHeight { get; private set; }
@@ -44,20 +37,18 @@ public struct Tile
         };
         if (requiredParameters.Any(argument => argument == null)) {
             GD.PushError("Not all of the required tile parameters are initialized!");
-            this = NullTile;
-            return;
         }
 
         id = tileInfo.id ?? -1;
         imageWidth = tileInfo.imageWidth ?? 0;
         imageHeight = tileInfo.imageHeight ?? 0;
-        type = tileInfo.type;
-        properties = tileInfo.properties;
+        properties = tileInfo.properties ?? new Property[0];
+        type = tileInfo.type ?? "";
         image = tileInfo.image;
         objectGroup = tileInfo.objectGroup;
-        probability = tileInfo.probability;
+        probability = tileInfo.probability ?? 0.0;
         terrain = tileInfo.terrain;
-        animation = tileInfo.animation;
+        animation = tileInfo.animation ?? new Frame[0];
     }
 }
 

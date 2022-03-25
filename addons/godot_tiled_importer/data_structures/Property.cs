@@ -28,7 +28,7 @@ public struct Property
             case PropertyType.File:
                 return typeof(string);
             case PropertyType.Object:
-                return typeof(Object);
+                return typeof(string);
             default:
                 return null;
         }
@@ -37,16 +37,16 @@ public struct Property
     public Property(string name, dynamic value, PropertyType propertyType) {
         if (name == null) {
             GD.PushError("Name of the property is not initialized!");
-            this = NullProperty;
-            return;
         }
-        this.name = name;
+        this.name = name ?? "";
         this.propertyType = propertyType;
         this.value = 0;
 
         Type expectedType = ConvertProperyTypeToSystemType(propertyType);
-        if (expectedType == null)
+        if (expectedType == null) {
             this = NullProperty;
+            return;
+        }
         try {
             value = Convert.ChangeType(value, ConvertProperyTypeToSystemType(propertyType));
         }

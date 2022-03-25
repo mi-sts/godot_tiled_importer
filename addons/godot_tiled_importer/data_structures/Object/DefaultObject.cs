@@ -9,9 +9,8 @@ public class DefaultObject : Object
     public DefaultObject (ObjectInfo objectInfo, int gID, Property[] properties) : base(objectInfo) {
         if (properties == null) {
             GD.PushError("Properties of the default object are not initialized!");
-            return;
         }
         this.gID = gID;
-        this.properties = properties;
+        this.properties = properties ?? new Property[0];
     }
 }

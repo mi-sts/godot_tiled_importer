@@ -13,9 +13,8 @@ public class PointObject : Object
     public PointObject (ObjectInfo objectInfo, Point[] points, PointObjectType pointObjectType) : base(objectInfo) {
         if (points == null) {
             GD.PushError("Points of the point object are not initialized!");
-            return;
         }
-        this.points = points;
+        this.points = points ?? new Point[0];
         this.pointObjectType = pointObjectType;
     }
 }
