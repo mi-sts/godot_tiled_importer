@@ -2,16 +2,15 @@ using Godot;
 using System;
 
 public enum PropertyType {
-    String, Int, Float, Bool, Color, File, Object, Null
+    String, Int, Float, Bool, Color, File, Object, Class, Null
 }
 
-public struct Property 
-{
+public struct Property {
     public static Property NullProperty = new Property("", 0, PropertyType.Null);
     public string name { get; private set; }
-    public dynamic value { get; private set; }
+    public object value { get; private set; }
     public PropertyType propertyType { get; private set; }
-
+    
     private static Type ConvertProperyTypeToSystemType(PropertyType propertyType) {
         // Some properties represented as a string.
         switch (propertyType) {
@@ -34,9 +33,14 @@ public struct Property
         }
     }
 
-    public Property(string name, dynamic value, PropertyType propertyType) {
+    public Property(string name, object value, PropertyType propertyType) {
         if (name == null) {
             GD.PushError("Name of the property is not initialized!");
+        }
+        if (value == null) {
+            GD.PushError("Value of the property is null!");
+            this = NullProperty;
+            return;
         }
         this.name = name ?? "";
         this.propertyType = propertyType;
@@ -53,7 +57,7 @@ public struct Property
         catch (InvalidCastException) {
             GD.PushError($"Can't cast the property value to the declared { expectedType.ToString() } type!");
             this = NullProperty;
-        } 
+        }
         catch (FormatException) {
             GD.PushError($"Property value type is not in a format recognized by { expectedType.ToString() } type!");
             this = NullProperty;

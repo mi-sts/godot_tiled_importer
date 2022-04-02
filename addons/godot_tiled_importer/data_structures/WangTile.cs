@@ -1,8 +1,7 @@
 using Godot;
 using System;
 
-public struct WangTile 
-{
+public struct WangTile {
     public static WangTile NullWangTile = new WangTile() { tileID = -1, wangID = new ushort[0] };
     public int tileID { get; private set; }
     public ushort[] wangID { get; private set; }

@@ -2,12 +2,10 @@ using Godot;
 using System;
 using System.Text;
 
-public class Base64Decoder : Decoder
-{
-    protected byte[] DecodeToByteData(string encodedString)
-    {
+public class Base64Decoder : Decoder {
+    protected byte[] DecodeToByteData(string encodedString) {
         if (encodedString == null) {
-            GD.PushError("Decoding string are empty!");
+            GD.PushError("Decoding string is null!");
             return null;
         }
 
@@ -36,7 +34,7 @@ public class Base64Decoder : Decoder
         return tileIDs;
     }
 
-    protected LayerData DecodedByteDataToLayerData(byte[] decodedData, int mapWidth, int mapHeight) {
+    protected TileLayerData DecodedByteDataToLayerData(byte[] decodedData, int layerWidth, int layerHeight) {
         if (decodedData.Length % 4 != 0) {
             GD.PushError("Incorrect data. Decoded data can't be devided into uint IDs");
             return null;
@@ -44,20 +42,41 @@ public class Base64Decoder : Decoder
 
         // If the system architecture is big-endian.
         // reverse the byte array to keep the little-endian reading.
-        if (!BitConverter.IsLittleEndian) 
+        if (!BitConverter.IsLittleEndian)
             Array.Reverse(decodedData);
 
         uint[] tileIDs = ConvertByteArrayToUIntArray(decodedData);
-        if (tileIDs == null) 
+        if (tileIDs == null)
             return null;
         bool[][] flipFlags = DecodeFlipFlagsAndClear(ref tileIDs);
 
-        return CreateLayerData(tileIDs, flipFlags, mapWidth, mapHeight );
+        return CreateLayerData(tileIDs, flipFlags, layerWidth, layerHeight);
     }
 
-    public override LayerData Decode(string encodedString, int mapWidth, int mapHeigth)
-    {
+    public override TileLayerData Decode(string encodedString, int layerWidth, int layerHeigth) {
         byte[] decodedData = DecodeToByteData(encodedString);
-        return DecodedByteDataToLayerData(decodedData, mapWidth, mapHeigth);
+        return DecodedByteDataToLayerData(decodedData, layerWidth, layerHeigth);
+    }
+
+    public TileLayerData Decode(string encodedString, int layerWidth, int layerHeight, Compression compression) {
+        byte[] decodedData = DecodeToByteData(encodedString);
+        Decompressor decompressor = null;
+        switch (compression) {
+            case Compression.GZip:
+                decompressor = new GZipDecompressor();
+                break;
+            case Compression.ZLib:
+                decompressor = new ZLibDecompressor();
+                break;
+            case Compression.ZStd:
+                // Not implemented now.
+                break;
+            case Compression.None:
+                break;
+        }
+        if (decompressor == null) {
+            return DecodedByteDataToLayerData(decodedData, layerWidth, layerHeight);
+        }
+        return DecodedByteDataToLayerData(decompressor.Decompress(decodedData), layerWidth, layerHeight);
     }
 }

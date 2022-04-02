@@ -15,43 +15,47 @@ public class CSVDecoder : Decoder {
         });
     }
 
-    public override LayerData Decode(string encodedString, int mapWidth, int mapHeight) {
+    public override TileLayerData Decode(string encodedString, int layerWidth, int layerHeight) {
+        if (encodedString == null) {
+            GD.PushError("Decoding string is null!");
+            return null;
+        }
         string[] rows = encodedString.Split('\n');
-        if (rows.Length != mapHeight) {
-            GD.PushError("Number of the map rows doesn't math the height of the map!");
+        if (rows.Length != layerHeight) {
+            GD.PushError("Number of the map layer doesn't math the height of the layer!");
             return null;
         }
 
-        uint[] tileIDs = new uint[mapWidth * mapHeight];
-        bool[][] flipFlags = new bool[mapWidth * mapHeight][];
+        uint[] tileIDs = new uint[layerWidth * layerHeight];
+        bool[][] flipFlags = new bool[layerWidth * layerHeight][];
 
-        for (int y = 0; y < mapHeight; ++y) {
+        for (int y = 0; y < layerHeight; ++y) {
             string[] rowElements = rows[y].Split(',').ToArray();
-            bool lastIsBreakLine = rowElements.Length == (mapWidth + 1) && rowElements[mapWidth] == "";
-            if (!lastIsBreakLine && rowElements.Length != mapWidth) {
-                GD.PushError("Number of elements in the map row doesn't match the width of the map!");
+            bool lastIsBreakLine = rowElements.Length == (layerWidth + 1) && rowElements[layerWidth] == "";
+            if (!lastIsBreakLine && rowElements.Length != layerWidth) {
+                GD.PushError("Number of elements in the layer row doesn't match the width of the layer!");
                 return null;
             }
             uint[] rowTileIDs = ParseRowTileIDs(rowElements);
             bool[][] rowfilpFlags = DecodeFlipFlagsAndClear(ref rowTileIDs);
 
             try {
-                Array.Copy(rowTileIDs, 0, tileIDs, y * mapWidth, mapWidth);
-            } 
+                Array.Copy(rowTileIDs, 0, tileIDs, y * layerWidth, layerWidth);
+            }
             catch (ArgumentOutOfRangeException) {
                 GD.PushError("Number of tiles ID copied doesn't match the size of one of the arrays!");
                 return null;
             }
 
             try {
-                Array.Copy(rowfilpFlags, 0, flipFlags, y * mapWidth, mapWidth);
-            } 
+                Array.Copy(rowfilpFlags, 0, flipFlags, y * layerWidth, layerWidth);
+            }
             catch (ArgumentOutOfRangeException) {
                 GD.PushError("Number of set of the flags copied doesn't match the size of one of the arrays!");
                 return null;
             }
         }
 
-        return CreateLayerData(tileIDs, flipFlags, mapWidth, mapHeight);
+        return CreateLayerData(tileIDs, flipFlags, layerWidth, layerHeight);
     }
 }

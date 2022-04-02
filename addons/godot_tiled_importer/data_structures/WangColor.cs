@@ -1,23 +1,38 @@
 using Godot;
 using System;
+using System.Linq;
 
-public struct WangColor 
-{
+public struct WangColorInfo {
+    public string name;
+    public Color? color;
+    public double? probability;    
+    public int? tileID;
+    public Property[] properties;
+}
+
+public struct WangColor {
     public string name { get; private set; }
     public Color color { get; private set; }
-    public Property[] properties { get; private set; }
     public double probability { get; private set; }
     public int tileID { get; private set; }
+    public Property[] properties { get; private set; } // (optional).
 
-    public WangColor(string name, Color color, Property[] properties, double probability, int tileID) {
-        if (name == null || properties == null) {
-            GD.PushError("Not all properties of the wang color are not initialized!");
+    public WangColor(WangColorInfo wangColorInfo) {
+        var requiredFields = new object[] {
+            wangColorInfo.name,
+            wangColorInfo.color,
+            wangColorInfo.probability,
+            wangColorInfo.tileID
+        };
+        if (requiredFields.Any(field => field == null)) {
+            GD.PushError("Not all of the required tile parameters are initialized!");
         }
-        this.name = name ?? "";
-        this.color = color;
-        this.properties = properties ?? new Property[0];
-        this.probability = probability;
-        this.tileID = tileID;
+        name = wangColorInfo.name ?? "";
+        color = wangColorInfo.color ?? new Color();
+        probability = wangColorInfo.probability ?? 0.0;
+        tileID = wangColorInfo.tileID ?? -1;
+
+        this.properties = wangColorInfo.properties ?? new Property[0];
     }
 }
 

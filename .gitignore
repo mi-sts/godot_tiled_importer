@@ -12,3 +12,4 @@ project.godot
 # VS-specific ignores
 *.sln
 .vs/
+omnisharp.json

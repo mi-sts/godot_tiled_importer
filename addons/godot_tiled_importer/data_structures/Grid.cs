@@ -1,13 +1,12 @@
 using Godot;
 using System;
 
-public enum GridOrientation { 
+public enum GridOrientation {
     Orthogonal, Isometric
-} 
+}
 
-public struct Grid 
-{
-    public GridOrientation orientation { get; private set; }
+public struct Grid {
+    public GridOrientation orientation { get; private set; } // (default: orthogonal).
     public int width { get; private set; }
     public int height { get; private set; }
 

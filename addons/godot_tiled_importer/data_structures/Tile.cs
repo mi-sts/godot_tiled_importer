@@ -11,44 +11,39 @@ public struct TileInfo {
     public string image;
     public Layer objectGroup;
     public double? probability;
-    public Terrain[] terrain;
+    public int[] terrainIndex;
     public Frame[] animation;
+    public Grid? grid;
 }
 
-public struct Tile 
-{
+public struct Tile {
     public int id { get; private set; }
-    public int imageWidth { get; private set; }
-    public int imageHeight { get; private set; }
+    public int? imageWidth { get; private set; } // (optional).
+    public int? imageHeight { get; private set; } // (optional).
     public string type { get; private set; } // The type of the tile (optional).
     public Property[] properties { get; private set; }
     public string image { get; private set; } // Image representing this tile (optional).
     public Layer objectGroup { get; private set; } // Layer with type objectgroup (optional).
-    public double probability { get; private set; } // Percentage chance this tile is chosen when competing with others in the editor (optional).
-    public Terrain[] terrain { get; private set; } // Index of terrain for each corner of tile (optional).
+    public double? probability { get; private set; } // Percentage chance this tile is chosen when competing with others in the editor (optional).
+    public int[] terrainIndex { get; private set; } // Index of terrain for each corner of tile (optional).
     public Frame[] animation { get; private set; } // Array of Frames (optional).
+    public Grid? grid { get; private set; } // (optional).
 
     public Tile(TileInfo tileInfo) {
-        var requiredParameters = new object[] { 
-            tileInfo.id,
-            tileInfo.imageWidth, 
-            tileInfo.imageHeight, 
-            tileInfo.properties 
-        };
-        if (requiredParameters.Any(argument => argument == null)) {
-            GD.PushError("Not all of the required tile parameters are initialized!");
+        if (tileInfo.id == null) {
+            GD.PushError("Tile id is not initialized!");
         }
 
         id = tileInfo.id ?? -1;
-        imageWidth = tileInfo.imageWidth ?? 0;
-        imageHeight = tileInfo.imageHeight ?? 0;
+        imageWidth = tileInfo.imageWidth;
+        imageHeight = tileInfo.imageHeight;
         properties = tileInfo.properties ?? new Property[0];
-        type = tileInfo.type ?? "";
+        type = tileInfo.type;
         image = tileInfo.image;
         objectGroup = tileInfo.objectGroup;
-        probability = tileInfo.probability ?? 0.0;
-        terrain = tileInfo.terrain;
-        animation = tileInfo.animation ?? new Frame[0];
+        probability = tileInfo.probability;
+        terrainIndex = tileInfo.terrainIndex;
+        animation = tileInfo.animation;
+        grid = tileInfo.grid;
     }
 }
-

@@ -6,32 +6,42 @@ public enum WangSetType {
     Corner, Edge, Mixed
 }
 
-public struct WangSet 
-{
+public struct WangSetInfo {
+    public string name;
+    public WangTile[] wangTiles;
+    public int? tileID;
+    public Property[] properties;
+    public WangSetType? type;
+    public WangColor[] colors;
+    
+}
+
+public struct WangSet {
     public string name { get; private set; }
     public WangTile[] wangTiles { get; private set; }
-    public WangColor[] colors { get; private set; }
     public int tileID { get; private set; }
     public Property[] properties { get; private set; }
-    public WangSetType type { get; private set; }
+    public WangSetType? type { get; private set; } // (optional).
+    public WangColor[] colors { get; private set; } // (optional).
 
-    public WangSet(string name, WangTile[] wangTiles, WangColor[] colors, int tileID, Property[] properties, WangSetType type) {
-        var requiredParameters = new object[] { 
-            name,
-            wangTiles,
-            colors,
-            tileID,
-            properties
+    public WangSet(WangSetInfo wangSetInfo) {
+        var requiredFields = new object[] {
+            wangSetInfo.name,
+            wangSetInfo.wangTiles,
+            wangSetInfo.tileID,
+            wangSetInfo.properties
         };
-        if (requiredParameters.Any(argument => argument == null)) {
+        if (requiredFields.Any(field => field == null)) {
             GD.PushError("Not all of the required tile parameters are initialized!");
         }
-        this.name = name ?? "";
-        this.wangTiles = wangTiles ?? new WangTile[0];
-        this.colors = colors ?? new WangColor[0];
-        this.tileID = tileID;
-        this.properties = properties ?? new Property[0];
-        this.type = type;
+
+        name = wangSetInfo.name ?? "";
+        wangTiles = wangSetInfo.wangTiles ?? new WangTile[0];
+        tileID = wangSetInfo.tileID ?? -1;
+        properties = wangSetInfo.properties ?? new Property[0];
+
+        type = wangSetInfo.type;
+        colors = wangSetInfo.colors;
     }
 }
 

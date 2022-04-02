@@ -2,46 +2,45 @@ using Godot;
 using System;
 
 // Сontains information about the layer that was parsed from the data field.
-public class LayerData 
-{
+public class TileLayerData {
     public TileData[,] tiles;
-    public int mapWidth { get; private set; }
-    public int mapHeight { get; private set; }
+    public int layerWidth { get; private set; }
+    public int layerHeight { get; private set; }
 
-    public LayerData(TileData[,] tiles, int mapWidth, int mapHeight) {
-        if (mapWidth <= 0 || mapHeight <= 0) {
+    public TileLayerData(TileData[,] tiles, int layerWidth, int layerHeight) {
+        if (layerWidth <= 0 || layerHeight <= 0) {
             GD.PushError("Incorrect size of the map!");
             return;
         }
-        if (tiles.GetLength(0) != mapHeight || tiles.GetLength(1) != mapWidth) {
+        if (tiles.GetLength(0) != layerHeight || tiles.GetLength(1) != layerWidth) {
             GD.PushError("Number of tiles doesn't math the size of the map!");
             return;
         }
-        
+
         this.tiles = tiles;
-        this.mapWidth = mapWidth;
-        this.mapHeight = mapHeight;
+        this.layerWidth = layerWidth;
+        this.layerHeight = layerHeight;
     }
 
-    public TileData this[int x, int y] 
+    public TileData this[int x, int y]
     {
-        get {
-            if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) {
+        get
+        {
+            if (x < 0 || x >= layerWidth || y < 0 || y >= layerHeight) {
                 GD.PushError("Tile position index is out of range!");
                 return TileData.EMPTY;
             }
-            
+
             return tiles[y, x];
         }
     }
 
-    public override string ToString()
-    {
+    public override string ToString() {
         string strRepresentation = "";
 
-        for (int y = 0; y < mapWidth; ++y) {
+        for (int y = 0; y < layerWidth; ++y) {
             strRepresentation += "| ";
-            for (int x = 0; x < mapHeight; ++x)
+            for (int x = 0; x < layerHeight; ++x)
                 strRepresentation += this[x, y].GID + " | ";
             strRepresentation += "\n";
         }

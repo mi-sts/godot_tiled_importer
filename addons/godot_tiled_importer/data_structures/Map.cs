@@ -30,14 +30,13 @@ public struct MapInfo {
     public string type;
 }
 
-public class Map
-{   
+public class Map {
     public Layer[] layers { get; private set; }
     public int width { get; private set; }
     public int height { get; private set; }
     public MapOrientation mapOrientation { get; private set; }
     public Property[] properties { get; private set; }
-    public int tileWidth { get; private set;}
+    public int tileWidth { get; private set; }
     public int tileHeight { get; private set; }
     public TileSet[] tileSets { get; private set; }
     public int? hexSideLength { get; private set; } // Length of the side of a hex tile in pixels (hexagonal maps only).
@@ -51,27 +50,25 @@ public class Map
     public string type { get; private set; } // map (since 1.0).
 
     public Map(MapInfo mapInfo) {
-        var requiredParameters = new object[] {
+        var requiredFields = new object[] {
             mapInfo.layers,
             mapInfo.width,
             mapInfo.height,
             mapInfo.mapOrientation,
-            mapInfo.properties,
             mapInfo.tileWidth,
             mapInfo.tileHeight,
             mapInfo.tileSets,
             mapInfo.infinite,
             mapInfo.tiledVersion
         };
-        if (requiredParameters.Any(parameter => parameter == null)) {
+        if (requiredFields.Any(field => field == null)) {
             GD.PushError("Not all of the required map parameters are initialized!");
         }
 
         layers = mapInfo.layers ?? new Layer[0];
         width = mapInfo.width ?? 0;
         height = mapInfo.height ?? 0;
-        mapOrientation = mapInfo.mapOrientation ??  MapOrientation.Orthogonal;
-        properties = mapInfo.properties ?? new Property[0];
+        mapOrientation = mapInfo.mapOrientation ?? MapOrientation.Orthogonal;
         tileWidth = mapInfo.tileWidth ?? 0;
         tileHeight = mapInfo.tileHeight ?? 0;
         tileSets = mapInfo.tileSets ?? new TileSet[0];
@@ -84,6 +81,7 @@ public class Map
         renderOrder = mapInfo.renderOrder ?? RenderOrder.RightDown;
         staggerAxis = mapInfo.staggerAxis;
         staggerIndex = mapInfo.staggerIndex;
+        properties = mapInfo.properties ?? new Property[0];
     }
 }
 
