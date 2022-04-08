@@ -91,6 +91,7 @@ public class TileSet {
         tileOffset = tileSetInfo.tileOffset;
         transfromations = tileSetInfo.transfromations;
         transparentColor = tileSetInfo.transparentColor;
+        properties = tileSetInfo.properties ?? new Property[0];
     }
 }
 

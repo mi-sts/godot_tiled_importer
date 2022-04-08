@@ -54,6 +54,8 @@ public abstract class Layer {
             layerInfo.infinite
         };
         if (requiredFields.Any(field => field == null)) {
+            foreach (object i in requiredFields)
+                GD.Print(i);
             GD.PushError("Not all of the required layer parameters are initialized!");
         }
         name = layerInfo.name ?? "";

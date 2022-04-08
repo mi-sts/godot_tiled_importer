@@ -75,14 +75,13 @@ public class JsonMapParser : Parser {
             return null;
         }
         Layer[] layers = ParseLayersArray(layersArray);
+        mapInfo.layers = layers;
 
         var propertiesArray = mapDictionary.TryGet("properties") as Godot.Collections.Array;
-        if (layersArray == null) {
-            GD.PushError("Can't extract the array of properties in the map!");
-            return null;
+        if (propertiesArray != null) {
+            mapInfo.properties = ParsePropertiesArray(propertiesArray);
         }
-        mapInfo.properties = ParsePropertiesArray(propertiesArray);
-
+        
         mapInfo.renderOrder = DetermineRenderOrder(ToString(mapDictionary.TryGet("renderorder")));
         mapInfo.parallaxOriginPoint = ParseParallaxOriginPoint(mapDictionary);
         string backgroundColorHexCode = ToString(mapDictionary.TryGet("backgroundcolor"));
@@ -434,19 +433,11 @@ public class JsonMapParser : Parser {
         }
         wangSetInfo.wangTiles = wangTiles.ToArray();
 
-        var propertiesArray = wangSetDictionary.TryGet("properties") as Godot.Collections.Array;
-        if (propertiesArray == null) {
-            GD.PushError("Properties field of the wang set is null!");
-            return null;
-        }
-        wangSetInfo.properties = ParsePropertiesArray(propertiesArray);
-
         wangSetInfo.name = ToString(wangSetDictionary.TryGet("name"));
         wangSetInfo.tileID = ToInt(wangSetDictionary.TryGet("tileid"));
 
         var parsedRequiredWangSetFields = new object[] { 
             wangSetInfo.wangTiles,
-            wangSetInfo.properties,
             wangSetInfo.name,
             wangSetInfo.tileID
         };
@@ -460,13 +451,18 @@ public class JsonMapParser : Parser {
         if (wangColorsArray != null) {
             var wangColors = new List<WangColor>();
             foreach (object wangColorElement in wangColorsArray) {
-                var colorDictionary = wangSetDictionary.TryGet("colors") as Godot.Collections.Dictionary;
+                var colorDictionary = wangColorElement as Godot.Collections.Dictionary;
                 var color = ParseWangColor(colorDictionary);
                 if (color != null) {
                     wangColors.Add(color.GetValueOrDefault());
                 }
             }
             wangSetInfo.colors = wangColors.ToArray();
+        }
+
+        var propertiesArray = wangSetDictionary.TryGet("properties") as Godot.Collections.Array;
+        if (propertiesArray != null) {
+            wangSetInfo.properties = ParsePropertiesArray(propertiesArray);
         }
 
         return new WangSet(wangSetInfo);
@@ -546,6 +542,10 @@ public class JsonMapParser : Parser {
         int? yTilesOffset = ToInt(layerDictionary.TryGet("y"));
         LayerInfo layerInfo = new LayerInfo();
         layerInfo.tilesOffset = new IntPoint(xTilesOffset ?? 0, yTilesOffset ?? 0);
+        layerInfo.name = ToString(layerDictionary.TryGet("name"));
+        layerInfo.id = ToInt(layerDictionary.TryGet("id"));
+        layerInfo.width = ToInt(layerDictionary.TryGet("width"));
+        layerInfo.height = ToInt(layerDictionary.TryGet("height"));
         layerInfo.visible = ToBool(layerDictionary.TryGet("visible"));
         layerInfo.type = DetermineLayerType(ToString(layerDictionary.TryGet("type")));
         layerInfo.opacity = ToDouble(layerDictionary.TryGet("opacity"));
@@ -553,6 +553,10 @@ public class JsonMapParser : Parser {
         var parsedRequiredLayerFields = new object[] { 
             xTilesOffset,
             yTilesOffset,
+            layerInfo.name,
+            layerInfo.id,
+            layerInfo.width, 
+            layerInfo.height,
             layerInfo.tilesOffset,
             layerInfo.visible,
             layerInfo.type,
@@ -681,9 +685,9 @@ public class JsonMapParser : Parser {
             return null;
         }
         if (layerInfo.infinite ?? false) {
-            return FillToNotInfiniteTileLayer(layerDictionary, layerInfo);
-        } else {
             return FillToInfiniteTileLayer(layerDictionary, layerInfo);
+        } else {
+            return FillToNotInfiniteTileLayer(layerDictionary, layerInfo);
         }
     }
 
@@ -743,13 +747,11 @@ public class JsonMapParser : Parser {
     }
 
     private ObjectType DetermineObjectType(Godot.Collections.Dictionary objectDictionary) {
-        if (ToBool(objectDictionary.TryGet("ellipse")) == true || 
-            ToBool(objectDictionary.TryGet("point")) == true) {
+        if (ToBool(objectDictionary.TryGet("ellipse")) == true || ToBool(objectDictionary.TryGet("point")) == true) {
             return ObjectType.ShapeObject;
-        } else if (ToBool(objectDictionary.TryGet("polygon")) == true ||
-            ToBool(objectDictionary.TryGet("polyline")) == true) {
+        } else if (objectDictionary.Contains("polygon") || objectDictionary.Contains("polyline")) {
             return ObjectType.PointObject;
-        } else if (ToBool(objectDictionary.TryGet("text")) == true) {
+        } else if (objectDictionary.Contains("text")) {
             return ObjectType.TextObject;
         } else if (objectDictionary.Contains("gid")) {
             return ObjectType.DefaultObject;
@@ -921,13 +923,10 @@ public class JsonMapParser : Parser {
     private ShapeObjectType? DetermineShapeObjectType(Godot.Collections.Dictionary objectDictionary) {
         if (ToBool(objectDictionary.TryGet("ellipse")) == true) {
             return ShapeObjectType.Ellipse;
-        } else if (ToBool(objectDictionary.TryGet("rectangle")) == true) {
-            return ShapeObjectType.Rectangle;
         } else if (ToBool(objectDictionary.TryGet("point")) == true) {
             return ShapeObjectType.Point;
         } else {
-            GD.PushError("Can't determine a shape object type!");
-            return null;
+            return ShapeObjectType.Rectangle;
         }
     }
 

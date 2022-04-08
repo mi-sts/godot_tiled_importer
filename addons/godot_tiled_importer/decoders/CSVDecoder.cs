@@ -3,9 +3,9 @@ using System.Linq;
 using Godot;
 
 public class CSVDecoder : Decoder {
-    private uint[] ParseRowTileIDs(string[] rowElements) {
+    private uint[] ParseTileIDs(string[] elements) {
         uint parseResult = 0;
-        return Array.ConvertAll(rowElements, strID => {
+        return Array.ConvertAll(elements, strID => {
             if (uint.TryParse(strID, out parseResult))
                 return parseResult;
             else {
@@ -20,41 +20,15 @@ public class CSVDecoder : Decoder {
             GD.PushError("Decoding string is null!");
             return null;
         }
-        string[] rows = encodedString.Split('\n');
-        if (rows.Length != layerHeight) {
+
+        encodedString = encodedString.Substr(1, encodedString.Length - 2); // Remove '[' and ']' array symbols at the beginning and end.
+        string[] elements = encodedString.Split(',').ToArray();
+        if (elements.Length != layerWidth * layerHeight) {
             GD.PushError("Number of the map layer doesn't math the height of the layer!");
             return null;
         }
-
-        uint[] tileIDs = new uint[layerWidth * layerHeight];
-        bool[][] flipFlags = new bool[layerWidth * layerHeight][];
-
-        for (int y = 0; y < layerHeight; ++y) {
-            string[] rowElements = rows[y].Split(',').ToArray();
-            bool lastIsBreakLine = rowElements.Length == (layerWidth + 1) && rowElements[layerWidth] == "";
-            if (!lastIsBreakLine && rowElements.Length != layerWidth) {
-                GD.PushError("Number of elements in the layer row doesn't match the width of the layer!");
-                return null;
-            }
-            uint[] rowTileIDs = ParseRowTileIDs(rowElements);
-            bool[][] rowfilpFlags = DecodeFlipFlagsAndClear(ref rowTileIDs);
-
-            try {
-                Array.Copy(rowTileIDs, 0, tileIDs, y * layerWidth, layerWidth);
-            }
-            catch (ArgumentOutOfRangeException) {
-                GD.PushError("Number of tiles ID copied doesn't match the size of one of the arrays!");
-                return null;
-            }
-
-            try {
-                Array.Copy(rowfilpFlags, 0, flipFlags, y * layerWidth, layerWidth);
-            }
-            catch (ArgumentOutOfRangeException) {
-                GD.PushError("Number of set of the flags copied doesn't match the size of one of the arrays!");
-                return null;
-            }
-        }
+        uint[] tileIDs = ParseTileIDs(elements);
+        bool[][] flipFlags = DecodeFlipFlagsAndClear(ref tileIDs);
 
         return CreateLayerData(tileIDs, flipFlags, layerWidth, layerHeight);
     }

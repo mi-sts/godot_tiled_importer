@@ -29,7 +29,6 @@ public struct WangSet {
             wangSetInfo.name,
             wangSetInfo.wangTiles,
             wangSetInfo.tileID,
-            wangSetInfo.properties
         };
         if (requiredFields.Any(field => field == null)) {
             GD.PushError("Not all of the required tile parameters are initialized!");

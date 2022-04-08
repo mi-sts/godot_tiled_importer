@@ -12,42 +12,84 @@ public abstract class Parser {
     public abstract Map Parse(string data);
 
     protected int? ToInt(object data) {
-        if (int.TryParse(ToString(data), out int result))
-            return result;
+        int? converted = null;
+        try {
+            converted = Convert.ToInt32(data);
+        } catch (Exception exception) {
+            if (exception is FormatException || exception is InvalidCastException) {
+                GD.PushError("Can't convert to int!");
+            }
+            else if (exception is OverflowException) {
+                GD.PushError("Parsing value is out of the range of int!");
+            }
+        }
 
-        return null;
+        return converted;
     }
 
     protected uint? ToUInt(object data) {
-        if (uint.TryParse(ToString(data), out uint result))
-            return result;
-        
-        return null;
+        uint? converted = null;
+        try {
+            converted = Convert.ToUInt32(data);
+        } catch (Exception exception) {
+            if (exception is FormatException || exception is InvalidCastException) {
+                GD.PushError("Can't convert to uint!");
+            }
+            else if (exception is OverflowException) {
+                GD.PushError("Parsing value is out of the range of uint!");
+            }
+        }
+
+        return converted;
     }
 
     protected double? ToDouble(object data) {
-        if (double.TryParse(ToString(data), out double result))
-            return result;
+        double? converted = null;
+        try {
+            converted = Convert.ToDouble(data);
+        } catch (Exception exception) {
+            if (exception is FormatException || exception is InvalidCastException) {
+                GD.PushError("Can't convert to dpuble!");
+            }
+            else if (exception is OverflowException) {
+                GD.PushError("Parsing value is out of the range of double!");
+            }
+        }
 
-        return null;
+        return converted;
     }
 
     protected ushort? ToUShort(object data) {
-        if (ushort.TryParse(ToString(data), out ushort result))
-            return result;
+        ushort? converted = null;
+        try {
+            converted = Convert.ToUInt16(data);
+        } catch (Exception exception) {
+            if (exception is FormatException || exception is InvalidCastException) {
+                GD.PushError("Can't convert to ushort!");
+            }
+            else if (exception is OverflowException) {
+                GD.PushError("Parsing value is out of the range of ushort!");
+            }
+        }
 
-        return null;
+        return converted;
     }
 
     protected bool? ToBool(object data) {
-        if (bool.TryParse(ToString(data), out bool result))
-            return result;
+        bool? converted = null;
+        try {
+            converted = Convert.ToBoolean(data);
+        } catch (Exception exception) { 
+            if (exception is FormatException || exception is InvalidCastException) {
+                GD.PushError("Can't convert to bool!");
+            } 
+        }
 
-        return null;
+        return converted;
     }
 
     protected string ToString(object data) {
-        return data as string;
+        return Convert.ToString(data);
     }
 
     protected MapOrientation? DetermineMapOrientation(string orientation) {
@@ -271,7 +313,7 @@ public abstract class Parser {
     }
 
     protected Color? ParseColor(string colorHexCode) {
-        return new Color("#" + colorHexCode);
+        return new Color(colorHexCode);
     }
 
     protected ushort[] ParseWangID(Godot.Collections.Array wangIDArray) {

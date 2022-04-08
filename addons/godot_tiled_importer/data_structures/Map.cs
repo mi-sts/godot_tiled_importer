@@ -35,7 +35,7 @@ public class Map {
     public int width { get; private set; }
     public int height { get; private set; }
     public MapOrientation mapOrientation { get; private set; }
-    public Property[] properties { get; private set; }
+    public Property[] properties { get; private set; } // optional.
     public int tileWidth { get; private set; }
     public int tileHeight { get; private set; }
     public TileSet[] tileSets { get; private set; }
