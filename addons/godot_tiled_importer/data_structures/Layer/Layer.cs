@@ -10,8 +10,6 @@ public struct LayerInfo {
     public string name;
     public int? id;
     public IntPoint? startPoint;
-    public int? width;
-    public int? height;
     public Property[] properties;
     public IntPoint? tilesOffset;
     public bool? visible;
@@ -28,8 +26,6 @@ public abstract class Layer {
     public string name { get; private set; }
     public int id { get; private set; } // Incremental ID - unique across all layers.
     public IntPoint? startPoint { get; private set; } // Point where content starts (for infinite maps).
-    public int width { get; private set; }
-    public int height { get; private set; }
     public Property[] properties { get; private set; }
     public IntPoint tilesOffset { get; private set; } // Layer offset in tiles. Always 0.
     public bool visible { get; private set; }
@@ -45,23 +41,17 @@ public abstract class Layer {
         var requiredFields = new object[] {
             layerInfo.name,
             layerInfo.id,
-            layerInfo.width,
-            layerInfo.height,
             layerInfo.tilesOffset,
             layerInfo.visible,
             layerInfo.type,
             layerInfo.opacity,
             layerInfo.infinite
         };
-        if (requiredFields.Any(field => field == null)) {
-            foreach (object i in requiredFields)
-                GD.Print(i);
+        if (requiredFields.Any(field => field == null)) {   
             GD.PushError("Not all of the required layer parameters are initialized!");
         }
         name = layerInfo.name ?? "";
         id = layerInfo.id ?? 0;
-        width = layerInfo.width ?? 0;
-        height = layerInfo.height ?? 0;
         properties = layerInfo.properties ?? new Property[0];
         tilesOffset = layerInfo.tilesOffset ?? new IntPoint(0, 0);
         visible = layerInfo.visible ?? false;

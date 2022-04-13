@@ -27,7 +27,7 @@ public abstract class Decoder {
     }
 
     // Creates a LayerData object from a recieved tiles data.
-    protected TileLayerData CreateLayerData(uint[] mapGIDs, bool[][] flipFlags, int layerWidth, int layerHeight) {
+    protected TileLayerData CreateLayerData(uint[] mapGIDs, bool[][] flipFlags, int layerWidth, int layerHeight) {        
         if (mapGIDs.Length != layerHeight * layerWidth) {
             GD.PushError("Number of tiles doesn't math the size of the layer!");
             return null;

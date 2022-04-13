@@ -13,8 +13,6 @@ public class LayerJsonElement : JsonElement
                 { "y", ElementaryType.Int },
                 { "name", ElementaryType.String },
                 { "id", ElementaryType.Int },
-                { "width", ElementaryType.Int },
-                { "height", ElementaryType.Int },
                 { "visible", ElementaryType.Bool },
                 { "type", ElementaryType.LayerType },
                 { "opacity", ElementaryType.Double }
@@ -38,7 +36,8 @@ public class LayerJsonElement : JsonElement
 
                 // Not infinite tile layer fields.
                 { "compression", ElementaryType.Compression },
-                { "encdoding", ElementaryType.Encoding },
+                { "encoding", ElementaryType.Encoding },
+                { "data", ElementaryType.String },
 
                 // Object group layer fields.
                 { "draworder", ElementaryType.DrawOrder }
@@ -76,11 +75,10 @@ public class LayerJsonElement : JsonElement
         layerInfo.tilesOffset = new IntPoint(xTilesOffset, yTilesOffset);
         layerInfo.name = (string)requiredElementaryTypeFields["name"];
         layerInfo.id = (int)requiredElementaryTypeFields["id"];
-        layerInfo.width = (int)requiredElementaryTypeFields["width"];
-        layerInfo.height = (int)requiredElementaryTypeFields["height"];
         layerInfo.visible = (bool)requiredElementaryTypeFields["visible"];
         layerInfo.type = (LayerType)requiredElementaryTypeFields["type"];
         layerInfo.opacity = (double)requiredElementaryTypeFields["opacity"];
+        layerInfo.infinite = false;
 
 
         var optionalArrayFields = ParseOptionalArrayFields(elementDictionary);
@@ -88,8 +86,7 @@ public class LayerJsonElement : JsonElement
             GD.PushError("Dictionary of the optional array fields is null!");
             return null;
         }
-        layerInfo.properties = (Property[])optionalArrayFields["propertires"];
-
+        layerInfo.properties = (Property[])optionalArrayFields["properties"];
 
         var optionalElementaryTypeFields = ParseOptionalElementaryTypeFields(elementDictionary);
         if (optionalElementaryTypeFields == null) {
@@ -138,15 +135,22 @@ public class LayerJsonElement : JsonElement
         ) {
         int? width = (int?)optionalElementaryTypeFields["width"];
         int? height = (int?)optionalElementaryTypeFields["height"];
+        if (width == null || height == null) {
+            GD.PushError("One of the tile layer size fields is null!");
+            return null;
+        }
+
         if (optionalArrayFields["chunks"] != null) {
+            layerInfo.infinite = true;
             Chunk[] chunks = (Chunk[])optionalArrayFields["chunks"];
             if (chunks == null) {
                 GD.PushError("Parsed chunks array of the infinite tile layer is null!");
                 return null;
             }
 
-            return new TileLayer(layerInfo, chunks);
-        } else if (optionalArrayFields["layers"] != null) {
+            return new TileLayer(layerInfo, width ?? 0, height ?? 0, chunks);
+        } else if (optionalElementaryTypeFields["data"] != null) {
+            layerInfo.infinite = false;
             Compression compression = (Compression?)optionalElementaryTypeFields["compression"] ?? Compression.None;
             Encoding encoding = (Encoding?)optionalElementaryTypeFields["encoding"] ?? Encoding.CSV;
             string data = ParserUtils.ToString(elementDictionary.TryGet("data"));
@@ -154,10 +158,10 @@ public class LayerJsonElement : JsonElement
                 GD.PushError("Parsed data array of the not infinite tile layer is null!");
                 return null;
             }
-            TileLayerData layerData = ParseLayerData(
+            TileLayerData layerData = ParserUtils.ParseLayerData(
                 data,
-                layerInfo.width ?? 0,
-                layerInfo.height ?? 0,
+                width ?? 0,
+                height ?? 0,
                 encoding,
                 compression
             );
@@ -166,7 +170,7 @@ public class LayerJsonElement : JsonElement
                 return null;
             }
 
-            return new TileLayer(layerInfo, layerData);
+            return new TileLayer(layerInfo, width ?? 0, height ?? 0, layerData);
         } else {
             GD.PushError("Not determined type of tile layer (infinite or not)");
             return null;
@@ -179,7 +183,7 @@ public class LayerJsonElement : JsonElement
         Dictionary<string, object[]> optionalArrayFields
         ) {
         DrawOrder drawOrder = (DrawOrder?)optionalElementaryTypeFields["draworder"] ?? DrawOrder.TopDown;
-        Object[] objects = (Object[])optionalArrayFields["objects"];
+        var objects = Array.ConvertAll(optionalArrayFields["objects"], groupObject => (Object)groupObject);
         if (objects == null) {
             GD.PushError("Parsed objects array of the object group layer is null!");
             return null;     
@@ -199,17 +203,5 @@ public class LayerJsonElement : JsonElement
         }
                 
         return new GroupLayer(layerInfo, layers);
-    }
-
-    private TileLayerData ParseLayerData(string data, int layerWidth, int layerHeight, Encoding encoding, Compression compression = Compression.None) {
-        switch (encoding) {
-            case Encoding.CSV:
-                if (compression != Compression.None) {
-                    GD.PushError("CSV format can't be compressed!");
-                }
-                return new CSVDecoder().Decode(data, layerWidth, layerHeight);
-            default:
-                return new Base64Decoder().Decode(data, layerWidth, layerHeight, compression);
-        }
     }
 }

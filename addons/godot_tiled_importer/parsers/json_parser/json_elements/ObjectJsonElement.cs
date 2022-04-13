@@ -17,8 +17,7 @@ public class ObjectJsonElement  : JsonElement
                 { "height", ElementaryType.Double },
                 { "rotation", ElementaryType.Double },
                 { "type", ElementaryType.String },
-                { "visible", ElementaryType.Bool },
-                { "template", ElementaryType.String }
+                { "visible", ElementaryType.Bool }            
             }; 
         }
     }
@@ -27,6 +26,8 @@ public class ObjectJsonElement  : JsonElement
         get 
         { 
             return new Dictionary<string, ElementaryType>() {
+                { "template", ElementaryType.String },
+
                 // Shape object fields.
                 { "ellipse", ElementaryType.Bool },
                 { "point", ElementaryType.Bool },
@@ -78,35 +79,32 @@ public class ObjectJsonElement  : JsonElement
         objectInfo.rotation = (double)requiredElementaryTypeFields["rotation"];
         objectInfo.type = (string)requiredElementaryTypeFields["type"];
         objectInfo.visible = (bool)requiredElementaryTypeFields["visible"];
-        objectInfo.template = (string)requiredElementaryTypeFields["template"];
 
         var optionalElementaryTypeFields = ParseOptionalElementaryTypeFields(elementDictionary);
         if (optionalElementaryTypeFields == null) {
             GD.PushError("Dictionary of the optional elementary type fields is null!");
             return null;
         }
-        if (optionalElementaryTypeFields["ellipse"] as bool? == true || 
-            optionalElementaryTypeFields["point"] as bool? == true) {
-            objectInfo.objectType = ObjectType.ShapeObject;
-        } else if (optionalElementaryTypeFields["polygon"] != null || 
-            optionalElementaryTypeFields["polyline"] != null) {
-            objectInfo.objectType = ObjectType.PointObject;
-        } else if (optionalElementaryTypeFields["text"] != null) {
-            objectInfo.objectType = ObjectType.DefaultObject;
-        } else {
-            objectInfo.objectType = ObjectType.ShapeObject;
+        var optionalArrayFields = ParseOptionalArrayFields(elementDictionary);
+        if (optionalArrayFields == null) {
+            GD.PushError("Dictionary of the optional array fields is null!");
+            return null;
         }
-
         var optionalFields = ParseOptionalFields(elementDictionary);
         if (optionalFields == null) {
             GD.PushError("Dictionary of the optional fields is null!");
             return null;
         }
-
-        var optionalArrayFields = ParseOptionalArrayFields(elementDictionary);
-        if (optionalArrayFields == null) {
-            GD.PushError("Dictionary of the optional array fields is null!");
-            return null;
+        objectInfo.template = (string)optionalElementaryTypeFields["template"];
+        if (optionalElementaryTypeFields["ellipse"] as bool? == true || 
+            optionalElementaryTypeFields["point"] as bool? == true) {
+            objectInfo.objectType = ObjectType.ShapeObject;
+        } else if (optionalArrayFields["polygon"] != null || optionalArrayFields["polyline"] != null) {
+            objectInfo.objectType = ObjectType.PointObject;
+        } else if (optionalFields["text"] != null) {
+            objectInfo.objectType = ObjectType.DefaultObject;
+        } else {
+            objectInfo.objectType = ObjectType.ShapeObject;
         }
 
         switch (objectInfo.objectType) {

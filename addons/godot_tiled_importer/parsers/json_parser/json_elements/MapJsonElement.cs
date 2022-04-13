@@ -81,8 +81,8 @@ public class MapJsonElement : JsonElement
             GD.PushError("Dictionary of the required array fields is null!");
             return null;
         }
-        mapInfo.layers = (Layer[])requiredArrayFields["layers"];
-        mapInfo.tileSets = (TileSet[])requiredArrayFields["tilesets"];
+        mapInfo.layers = Array.ConvertAll(requiredArrayFields["layers"], layer => (Layer)layer);
+        mapInfo.tileSets = Array.ConvertAll(requiredArrayFields["tilesets"], tileSet => (TileSet)tileSet);
 
 
         var optionalArrayFields = ParseOptionalArrayFields(elementDictionary);
@@ -90,7 +90,9 @@ public class MapJsonElement : JsonElement
             GD.PushError("Dictionary of the optional array fields is null!");
             return null;
         }
-        mapInfo.properties = (Property[])optionalArrayFields["propertires"];
+        if (optionalArrayFields["properties"] != null) { 
+            mapInfo.properties = Array.ConvertAll(optionalArrayFields["properties"], property => (Property)property);
+        }
 
 
         var optionalElementaryTypeFields = ParseOptionalElementaryTypeFields(elementDictionary);

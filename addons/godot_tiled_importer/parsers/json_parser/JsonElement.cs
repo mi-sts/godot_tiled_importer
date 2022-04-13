@@ -229,7 +229,7 @@ public abstract class JsonElement
         foreach (string name in OptionalElementaryTypeFieldsNames.Keys) {
             object optionalElementaryTypeFieldObject = elementDictionary.TryGet(name);
             if (optionalElementaryTypeFieldObject != null) {
-                object parsedField = ParseElementaryTypeField(optionalElementaryTypeFieldObject, RequiredElementaryTypeFieldsNames[name]);
+                object parsedField = ParseElementaryTypeField(optionalElementaryTypeFieldObject, OptionalElementaryTypeFieldsNames[name]);
                 if (parsedField == null) {
                     GD.PushError("Parsed optional elementary type field is null!");
                     return null;
@@ -312,7 +312,7 @@ public abstract class JsonElement
                 parsedOptionalArrayFields[name] = null;
             }
         }
-
+        
         return parsedOptionalArrayFields;
     }
 }
