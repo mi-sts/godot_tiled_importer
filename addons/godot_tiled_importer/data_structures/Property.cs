@@ -5,8 +5,7 @@ public enum PropertyType {
     String, Int, Float, Bool, Color, File, Object, Class, Null
 }
 
-public struct Property {
-    public static Property NullProperty = new Property("", 0, PropertyType.Null);
+public class Property {
     public string name { get; private set; }
     public object value { get; private set; }
     public PropertyType propertyType { get; private set; }
@@ -36,10 +35,10 @@ public struct Property {
     public Property(string name, object value, PropertyType propertyType) {
         if (name == null) {
             GD.PushError("Name of the property is not initialized!");
+            return;
         }
         if (value == null) {
             GD.PushError("Value of the property is null!");
-            this = NullProperty;
             return;
         }
         this.name = name ?? "";
@@ -48,7 +47,6 @@ public struct Property {
 
         Type expectedType = ConvertProperyTypeToSystemType(propertyType);
         if (expectedType == null) {
-            this = NullProperty;
             return;
         }
         try {
@@ -56,15 +54,12 @@ public struct Property {
         }
         catch (InvalidCastException) {
             GD.PushError($"Can't cast the property value to the declared { expectedType.ToString() } type!");
-            this = NullProperty;
         }
         catch (FormatException) {
             GD.PushError($"Property value type is not in a format recognized by { expectedType.ToString() } type!");
-            this = NullProperty;
         }
         catch (OverflowException) {
             GD.PushError($"Property value represents a number that is out of range of { expectedType.ToString() } type!");
-            this = NullProperty;
         }
     }
 }

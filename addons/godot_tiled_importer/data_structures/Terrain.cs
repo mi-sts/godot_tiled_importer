@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public struct Terrain {
+public class Terrain {
     public string name { get; private set; }
     public Property[] properties { get; private set; } // (optional).
     public int tileID { get; private set; }

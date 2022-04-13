@@ -16,7 +16,7 @@ public struct WangSetInfo {
     
 }
 
-public struct WangSet {
+public class WangSet {
     public string name { get; private set; }
     public WangTile[] wangTiles { get; private set; }
     public int tileID { get; private set; }
