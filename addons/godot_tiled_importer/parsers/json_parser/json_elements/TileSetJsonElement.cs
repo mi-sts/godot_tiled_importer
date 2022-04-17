@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GodotCollectionsExtensions;
 
 public class TileSetJsonElement : JsonElement
@@ -11,9 +12,6 @@ public class TileSetJsonElement : JsonElement
             return new Dictionary<string, ElementaryType>() {
                 { "name", ElementaryType.String },
                 { "firstgid", ElementaryType.Int },
-                { "image", ElementaryType.String },
-                { "imageheight", ElementaryType.Int },
-                { "imagewidth", ElementaryType.Int },
                 { "margin", ElementaryType.Int },
                 { "spacing", ElementaryType.Int },
                 { "tilecount", ElementaryType.Int },
@@ -27,6 +25,9 @@ public class TileSetJsonElement : JsonElement
         get
         { 
             return new Dictionary<string, ElementaryType>() {
+                { "image", ElementaryType.String },
+                { "imageheight", ElementaryType.Int },
+                { "imagewidth", ElementaryType.Int },
                 { "objectalignment", ElementaryType.TileObjectsAlignment },
                 { "transparentcolor", ElementaryType.Color }
             }; 
@@ -64,9 +65,6 @@ public class TileSetJsonElement : JsonElement
         var tileSetInfo = new TileSetInfo();
         tileSetInfo.name = (string)requiredElementaryTypeFields["name"];
         tileSetInfo.firstGID = (int)requiredElementaryTypeFields["firstgid"];
-        tileSetInfo.image = (string)requiredElementaryTypeFields["image"];
-        tileSetInfo.imageHeight = (int)requiredElementaryTypeFields["imageheight"];
-        tileSetInfo.imageWidth = (int)requiredElementaryTypeFields["imagewidth"];
         tileSetInfo.margin = (int)requiredElementaryTypeFields["margin"];
         tileSetInfo.spacing = (int)requiredElementaryTypeFields["spacing"];
         tileSetInfo.tileCount = (int)requiredElementaryTypeFields["tilecount"];
@@ -96,12 +94,33 @@ public class TileSetJsonElement : JsonElement
             GD.PushError("Dictionary of the optional array fields is null!");
             return null;
         }
-        tileSetInfo.properties = (Property[])optionalArrayFields["properties"];
-        tileSetInfo.wangSets = (WangSet[])optionalArrayFields["wangsets"];
-        tileSetInfo.terrains = (Terrain[])optionalArrayFields["terrains"];
-        object[] boxedTiles = optionalArrayFields["tiles"];
-        if (boxedTiles != null) {
-            tileSetInfo.tiles = Array.ConvertAll(boxedTiles, tile => (Tile)tile);
+        if (optionalArrayFields["tiles"] == null) {
+            tileSetInfo.type = TileSetType.SingleImageTileSet;
+            tileSetInfo.imageHeight = (int?)optionalElementaryTypeFields["imageheight"];
+            tileSetInfo.imageWidth = (int?)optionalElementaryTypeFields["imagewidth"];
+            tileSetInfo.image = (string)optionalElementaryTypeFields["image"];  
+            var requiredSingleImageTileSetFields = new object[] {
+                tileSetInfo.imageWidth,
+                tileSetInfo.imageHeight,
+                tileSetInfo.image
+            };
+            if (requiredSingleImageTileSetFields.Any(field => field == null)) {
+                GD.PushError("One of the required image tile set fields is null!");
+                return null;
+            }
+        } else {
+            tileSetInfo.type = TileSetType.MultupleImagesTileSet;
+            tileSetInfo.tiles = Array.ConvertAll(optionalArrayFields["tiles"], tile => (Tile)tile);
+        }
+        object[] boxedProperties = optionalArrayFields["properties"];
+        object[] boxedWangSets = optionalArrayFields["wangsets"];
+        object[] boxedTerrains = optionalArrayFields["terrains"];
+        if (boxedProperties != null) 
+            tileSetInfo.properties = Array.ConvertAll(boxedProperties, property => (Property) property);
+        if (boxedWangSets != null)
+            tileSetInfo.wangSets = Array.ConvertAll(boxedWangSets, wangSet => (WangSet)wangSet);
+        if (boxedTerrains != null) {
+            tileSetInfo.terrains = Array.ConvertAll(boxedTerrains, terrain => (Terrain)terrain);
         }
 
         return new TileSet(tileSetInfo);

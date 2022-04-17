@@ -10,7 +10,7 @@ public class WangSetJsonElement : JsonElement
         { 
             return new Dictionary<string, ElementaryType>() {
                 { "name", ElementaryType.String },
-                { "tileid", ElementaryType.Int },
+                { "tile", ElementaryType.Int },
             }; 
         }
     }        
@@ -19,7 +19,7 @@ public class WangSetJsonElement : JsonElement
         get 
         { 
             return new Dictionary<string, ElementaryType>() {
-                { "type", ElementaryType.String }
+                { "type", ElementaryType.WangSetType }
             }; 
         }
     }        
@@ -52,7 +52,7 @@ public class WangSetJsonElement : JsonElement
         }
         var wangSetInfo = new WangSetInfo();
         wangSetInfo.name = (string)requiredElementaryTypeFields["name"];
-        wangSetInfo.tileID = (int)requiredElementaryTypeFields["tileid"];
+        wangSetInfo.tileID = (int)requiredElementaryTypeFields["tile"];
 
 
         var optionalElementaryTypeFields = ParseOptionalElementaryTypeFields(elementDictionary);
@@ -60,7 +60,7 @@ public class WangSetJsonElement : JsonElement
             GD.PushError("Dictionary of the optional elementary type fields is null!");
             return null;
         }
-        wangSetInfo.type = (WangSetType)optionalElementaryTypeFields["type"];
+        wangSetInfo.type = (WangSetType?)optionalElementaryTypeFields["type"];
 
         var requiredArrayFields = ParseRequiredArrayFields(elementDictionary);
         if (requiredArrayFields == null) {
@@ -75,8 +75,12 @@ public class WangSetJsonElement : JsonElement
             GD.PushError("Dictionary of the optional array fields is null!");
             return null;
         }
-        wangSetInfo.properties = (Property[])optionalArrayFields["properties"];
-        wangSetInfo.colors = Array.ConvertAll(optionalArrayFields["color"], color => (WangColor)color);
+        object[] boxedProperties = optionalArrayFields["properties"];
+        object[] boxedColors = optionalArrayFields["colors"];
+        if (boxedProperties != null) 
+            wangSetInfo.properties = Array.ConvertAll(boxedProperties, property => (Property) property);
+        if (boxedColors != null)
+            wangSetInfo.colors = Array.ConvertAll(optionalArrayFields["colors"], color => (WangColor)color);
     
         return new WangSet(wangSetInfo);
     }

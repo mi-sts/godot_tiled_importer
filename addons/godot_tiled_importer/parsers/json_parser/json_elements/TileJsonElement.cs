@@ -9,12 +9,21 @@ public class TileJsonElement : JsonElement
         get
         { 
             return new Dictionary<string, ElementaryType>() {
+                { "id", ElementaryType.Int }
+            }; 
+        }
+    }
+
+    protected override Dictionary<string, ElementaryType> OptionalElementaryTypeFieldsNames {
+        get 
+        {
+            return new Dictionary<string, ElementaryType>() {
                 { "imageheight", ElementaryType.Int },
                 { "imagewidth", ElementaryType.Int },
                 { "type", ElementaryType.String },
                 { "image", ElementaryType.String },
                 { "probability", ElementaryType.Double }
-            }; 
+            };
         }
     }
     
@@ -46,11 +55,19 @@ public class TileJsonElement : JsonElement
             return null;
         }
         var tileInfo = new TileInfo();
-        tileInfo.imageWidth = (int)requiredElementaryTypeFields["imagewidth"];
-        tileInfo.imageHeight = (int)requiredElementaryTypeFields["imageheight"];
-        tileInfo.type = (string)requiredElementaryTypeFields["type"];
-        tileInfo.image = (string)requiredElementaryTypeFields["image"];
-        tileInfo.probability = (double)requiredElementaryTypeFields["probability"];
+        tileInfo.id = (int)requiredElementaryTypeFields["id"];
+
+
+        var optionalElementaryTypeFields = ParseOptionalElementaryTypeFields(elementDictionary);
+        if (optionalElementaryTypeFields == null) {
+            GD.PushError("Dictionary of the optional elementary type fields is null!");
+            return null;
+        }
+        tileInfo.imageWidth = (int?)optionalElementaryTypeFields["imagewidth"];
+        tileInfo.imageHeight = (int?)optionalElementaryTypeFields["imageheight"];
+        tileInfo.type = (string)optionalElementaryTypeFields["type"];
+        tileInfo.image = (string)optionalElementaryTypeFields["image"];
+        tileInfo.probability = (double?)optionalElementaryTypeFields["probability"];
 
 
         var optionalFields = ParseOptionalFields(elementDictionary);
@@ -70,8 +87,10 @@ public class TileJsonElement : JsonElement
             GD.PushError("Dictionary of the optional array fields is null!");
             return null;
         }
-        tileInfo.properties = (Property[])optionalArrayFields["properties"];
+        object[] boxedProperties = optionalArrayFields["properties"];
         object[] boxedAnimation = optionalArrayFields["animation"];
+        if (boxedProperties != null) 
+            tileInfo.properties = Array.ConvertAll(boxedProperties, property => (Property) property);
         if (boxedAnimation != null) {
             tileInfo.animation = Array.ConvertAll(boxedAnimation, frame => (Frame)frame);
         }

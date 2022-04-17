@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GodotCollectionsExtensions;
 
 public class LayerJsonElement : JsonElement
@@ -33,14 +34,15 @@ public class LayerJsonElement : JsonElement
                 // Tile layer fields.
                 { "width", ElementaryType.Int },
                 { "height", ElementaryType.Int },
-
-                // Not infinite tile layer fields.
                 { "compression", ElementaryType.Compression },
                 { "encoding", ElementaryType.Encoding },
                 { "data", ElementaryType.String },
 
                 // Object group layer fields.
-                { "draworder", ElementaryType.DrawOrder }
+                { "draworder", ElementaryType.DrawOrder },
+
+                // Infinite tile layer fields.
+                { "chunks", ElementaryType.Object },
             }; 
         }
     }
@@ -50,9 +52,6 @@ public class LayerJsonElement : JsonElement
         {
             return new Dictionary<string, DataStructure>() {
                 { "properties", DataStructure.Property },
-                
-                // Infinite tile layer fields.
-                { "chunks", DataStructure.Chunk },
 
                 // Group layer fields.
                 { "layers", DataStructure.Layer },
@@ -86,8 +85,9 @@ public class LayerJsonElement : JsonElement
             GD.PushError("Dictionary of the optional array fields is null!");
             return null;
         }
-        layerInfo.properties = (Property[])optionalArrayFields["properties"];
-
+        object[] boxedProperties = optionalArrayFields["properties"];
+        if (boxedProperties != null)
+            layerInfo.properties = Array.ConvertAll(optionalArrayFields["properties"], property => (Property)property);
         var optionalElementaryTypeFields = ParseOptionalElementaryTypeFields(elementDictionary);
         if (optionalElementaryTypeFields == null) {
             GD.PushError("Dictionary of the optional elementary type fields is null!");
@@ -140,19 +140,34 @@ public class LayerJsonElement : JsonElement
             return null;
         }
 
-        if (optionalArrayFields["chunks"] != null) {
+        Compression compression = (Compression?)optionalElementaryTypeFields["compression"] ?? Compression.None;
+        Encoding encoding = (Encoding?)optionalElementaryTypeFields["encoding"] ?? Encoding.CSV;
+
+        if (optionalElementaryTypeFields["chunks"] != null) {
             layerInfo.infinite = true;
-            Chunk[] chunks = (Chunk[])optionalArrayFields["chunks"];
-            if (chunks == null) {
+            var chunksArray = optionalElementaryTypeFields["chunks"] as Godot.Collections.Array;
+            if (chunksArray == null) {
                 GD.PushError("Parsed chunks array of the infinite tile layer is null!");
                 return null;
             }
+            var chunks = new List<Chunk>();
+            foreach (object chunkElement in chunksArray) {
+                var chunkDictionary = chunkElement as Godot.Collections.Dictionary;
+                if (chunkDictionary == null) {
+                    GD.PushError("Parsed chunk dictionary is null!");
+                    return null;
+                }
+                Chunk parsedChunk = ParseChunk(chunkDictionary, encoding, compression);
+                if (parsedChunk == null) {
+                    GD.PushError("Parsed chunk is null!");
+                    return null;
+                }
+                chunks.Add(parsedChunk);
+            }
 
-            return new TileLayer(layerInfo, width ?? 0, height ?? 0, chunks);
+            return new TileLayer(layerInfo, width ?? 0, height ?? 0, chunks.ToArray());
         } else if (optionalElementaryTypeFields["data"] != null) {
             layerInfo.infinite = false;
-            Compression compression = (Compression?)optionalElementaryTypeFields["compression"] ?? Compression.None;
-            Encoding encoding = (Encoding?)optionalElementaryTypeFields["encoding"] ?? Encoding.CSV;
             string data = ParserUtils.ToString(elementDictionary.TryGet("data"));
             if (data == null) {
                 GD.PushError("Parsed data array of the not infinite tile layer is null!");
@@ -203,5 +218,31 @@ public class LayerJsonElement : JsonElement
         }
                 
         return new GroupLayer(layerInfo, layers);
+    }
+
+    private Chunk ParseChunk(
+        Godot.Collections.Dictionary chunkDictionary, 
+        Encoding encoding,
+        Compression compression
+        ) {
+        int? width = ParserUtils.ToInt(chunkDictionary.TryGet("width"));
+        int? height = ParserUtils.ToInt(chunkDictionary.TryGet("height"));
+        int? xCoordinate = ParserUtils.ToInt(chunkDictionary.TryGet("x"));
+        int? yCoordinate = ParserUtils.ToInt(chunkDictionary.TryGet("y"));
+        IntPoint position = new IntPoint(xCoordinate ?? 0, yCoordinate ?? 0);
+        string data = ParserUtils.ToString(chunkDictionary.TryGet("data"));
+
+        var requiredFields = new object[] { width, height, xCoordinate, yCoordinate, data };
+        if (requiredFields.Any(field => field == null)) {
+            GD.PushError("One of the required chunk fields is null!");
+            return null;
+        }
+        TileLayerData parsedData = ParserUtils.ParseLayerData(data, width ?? 0, height ?? 0, encoding, compression);
+        if (parsedData == null) {
+            GD.PushError("Parsed chunk data is null!");
+            return null;
+        }
+
+        return new Chunk(parsedData, width ?? 0, height ?? 0, position);
     }
 }

@@ -22,7 +22,7 @@ public class FrameJsonElement : JsonElement
             return null;
         }
 
-        int tileID = (int)requiredElementaryTypeFields["tilid"];
+        int tileID = (int)requiredElementaryTypeFields["tileid"];
         int duration = (int)requiredElementaryTypeFields["duration"];
 
         return new Frame(tileID, duration);

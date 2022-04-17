@@ -6,6 +6,10 @@ public enum TileObjectsAlignment {
     Uncspecified, TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight
 }
 
+public enum TileSetType {
+    SingleImageTileSet, MultupleImagesTileSet
+}
+
 public struct TileSetInfo {
     public string name;
     public int? firstGID;
@@ -29,6 +33,7 @@ public struct TileSetInfo {
     public IntPoint? tileOffset;
     public Transfromations? transfromations;
     public Color? transparentColor;
+    public TileSetType? type;
 }
 
 public class TileSet {
@@ -54,22 +59,35 @@ public class TileSet {
     public IntPoint? tileOffset { get; private set; } // (optional).
     public Transfromations? transfromations { get; private set; } // Allowed transformations (optional).
     public Color? transparentColor { get; private set; } // (optional).
+    public TileSetType type { get; private set; }
 
     public TileSet(TileSetInfo tileSetInfo) {
         var requiredFields = new object[] {
             tileSetInfo.name,
             tileSetInfo.firstGID,
-            tileSetInfo.image,
-            tileSetInfo.imageHeight,
-            tileSetInfo.imageWidth,
             tileSetInfo.margin,
             tileSetInfo.spacing,
             tileSetInfo.tileCount,
             tileSetInfo.tileHeight,
-            tileSetInfo.tileWidth
+            tileSetInfo.tileWidth,
+            tileSetInfo.type
         };
         if (requiredFields.Any(field => field == null)) {
             GD.PushError("Not all of the required tile set parameters are initialized!");
+        }
+        switch (tileSetInfo.type) {
+            case TileSetType.MultupleImagesTileSet:
+                if (tileSetInfo.tiles == null) {
+                    GD.PushError("Tiles field of the multiple images tile set is null!");
+                }
+                break;
+            case TileSetType.SingleImageTileSet:
+                if (tileSetInfo.image == null || 
+                    tileSetInfo.imageWidth == null || 
+                    tileSetInfo.imageHeight == null) {
+                    GD.PushError("One of the required fields of the single image tile set is null!");
+                }
+                break;
         }
         name = tileSetInfo.name;
         firstGID = tileSetInfo.firstGID ?? -1;
@@ -81,6 +99,7 @@ public class TileSet {
         tileCount = tileSetInfo.tileCount ?? 0;
         tileHeight = tileSetInfo.tileHeight ?? 0;
         tileWidth = tileSetInfo.tileWidth ?? 0;
+        type = tileSetInfo.type ?? TileSetType.SingleImageTileSet;
 
         tiles = tileSetInfo.tiles;
         source = tileSetInfo.source;

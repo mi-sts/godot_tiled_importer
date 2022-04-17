@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GodotCollectionsExtensions;
 
 public class ObjectJsonElement  : JsonElement
@@ -9,15 +10,9 @@ public class ObjectJsonElement  : JsonElement
         get 
         { 
             return new Dictionary<string, ElementaryType>() {
-                { "name", ElementaryType.String },
                 { "id", ElementaryType.Int },
                 { "x", ElementaryType.Double },
-                { "y", ElementaryType.Double },
-                { "width", ElementaryType.Double },
-                { "height", ElementaryType.Double },
-                { "rotation", ElementaryType.Double },
-                { "type", ElementaryType.String },
-                { "visible", ElementaryType.Bool }            
+                { "y", ElementaryType.Double }          
             }; 
         }
     }
@@ -26,6 +21,15 @@ public class ObjectJsonElement  : JsonElement
         get 
         { 
             return new Dictionary<string, ElementaryType>() {
+                // Standard object fields.
+                { "name", ElementaryType.String },
+                { "width", ElementaryType.Double },
+                { "height", ElementaryType.Double },
+                { "rotation", ElementaryType.Double },
+                { "type", ElementaryType.String },
+                { "visible", ElementaryType.Bool },  
+
+                // Template object fields.
                 { "template", ElementaryType.String },
 
                 // Shape object fields.
@@ -68,17 +72,10 @@ public class ObjectJsonElement  : JsonElement
             GD.PushError("Dictionary of the required elementary type fields is null!");
             return null;
         }
-        var objectInfo = new ObjectInfo();
-        objectInfo.name = (string)requiredElementaryTypeFields["name"];
-        objectInfo.id = (int)requiredElementaryTypeFields["id"];
+        int id = (int)requiredElementaryTypeFields["id"];
         double xCoordinate = (double)requiredElementaryTypeFields["x"];
         double yCoordinate = (double)requiredElementaryTypeFields["y"];
-        objectInfo.coordinates = new Point(xCoordinate, yCoordinate);
-        objectInfo.width = (double)requiredElementaryTypeFields["width"];
-        objectInfo.height = (double)requiredElementaryTypeFields["height"];
-        objectInfo.rotation = (double)requiredElementaryTypeFields["rotation"];
-        objectInfo.type = (string)requiredElementaryTypeFields["type"];
-        objectInfo.visible = (bool)requiredElementaryTypeFields["visible"];
+        Point position = new Point(xCoordinate, yCoordinate);
 
         var optionalElementaryTypeFields = ParseOptionalElementaryTypeFields(elementDictionary);
         if (optionalElementaryTypeFields == null) {
@@ -95,27 +92,110 @@ public class ObjectJsonElement  : JsonElement
             GD.PushError("Dictionary of the optional fields is null!");
             return null;
         }
+
+        if (optionalElementaryTypeFields["template"] != null) {
+            return FillToTemplateObject(id, position, optionalElementaryTypeFields);
+        } else {
+            return FillToStandardObject(
+                id,
+                position,
+                optionalElementaryTypeFields,
+                optionalFields,
+                optionalArrayFields,
+                elementDictionary
+            );
+        }
+    }
+
+    private TemplateObject FillToTemplateObject(
+        int id, 
+        Point position, 
+        Dictionary<string, object> optionalElementaryTypeFields
+        ) {
+        string template = ParserUtils.ToString(optionalElementaryTypeFields["template"]);
+        if (template == null) {
+            GD.PushError("Template field of the template object is null!");
+            return null;
+        }
+        return new TemplateObject(id, position, ObjectType.TemplateObject, template);
+    }
+
+    private StandardObject FillToStandardObject(
+        int id,
+        Point position,
+        Dictionary<string, object> optionalElementaryTypeFields,
+        Dictionary<string, object> optionalFields,
+        Dictionary<string, object[]> optionalArrayFields,
+        Godot.Collections.Dictionary elementDictionary
+
+    ) {
+        var objectInfo = new StandardObjectInfo();
+        objectInfo.name = (string)optionalElementaryTypeFields["name"];
+        objectInfo.width = (double)optionalElementaryTypeFields["width"];
+        objectInfo.height = (double)optionalElementaryTypeFields["height"];
+        objectInfo.rotation = (double)optionalElementaryTypeFields["rotation"];
+        objectInfo.type = (string)optionalElementaryTypeFields["type"];
+        objectInfo.visible = (bool)optionalElementaryTypeFields["visible"];
         objectInfo.template = (string)optionalElementaryTypeFields["template"];
+        var requiredFields = new object[] {
+            objectInfo.name,
+            objectInfo.width,
+            objectInfo.height,
+            objectInfo.rotation,
+            objectInfo.type,
+            objectInfo.visible,
+        };
+        if (requiredFields.Any(field => field == null)) {
+            GD.PushError("One of the required standard object fields is null!");
+            return null;
+        }
+        ObjectType objectType = ObjectType.ShapeObject;
         if (optionalElementaryTypeFields["ellipse"] as bool? == true || 
             optionalElementaryTypeFields["point"] as bool? == true) {
-            objectInfo.objectType = ObjectType.ShapeObject;
+            objectType = ObjectType.ShapeObject;
         } else if (optionalArrayFields["polygon"] != null || optionalArrayFields["polyline"] != null) {
-            objectInfo.objectType = ObjectType.PointObject;
+            objectType = ObjectType.PointObject;
         } else if (optionalFields["text"] != null) {
-            objectInfo.objectType = ObjectType.DefaultObject;
+            objectType = ObjectType.DefaultObject;
         } else {
-            objectInfo.objectType = ObjectType.ShapeObject;
+            objectType = ObjectType.ShapeObject;
         }
 
-        switch (objectInfo.objectType) {
+        switch (objectType) {
             case ObjectType.DefaultObject:
-                return FillToDefaultObject(objectInfo, optionalElementaryTypeFields, optionalArrayFields);
+                return FillToDefaultObject(
+                    id,
+                    position, 
+                    objectType,
+                    objectInfo, 
+                    optionalElementaryTypeFields, 
+                    optionalArrayFields
+                    );
             case ObjectType.ShapeObject:
-                return FillToShapeObject(objectInfo, elementDictionary);
+                return FillToShapeObject(
+                    id,
+                    position,
+                    objectType,
+                    objectInfo, 
+                    elementDictionary
+                    );
             case ObjectType.PointObject:
-                return FillToPointObject(objectInfo, optionalArrayFields, elementDictionary);
+                return FillToPointObject(
+                    id,
+                    position,
+                    objectType,
+                    objectInfo, 
+                    optionalArrayFields, 
+                    elementDictionary
+                    );
             case ObjectType.TextObject:
-                return FillToTextObject(objectInfo, optionalFields);
+                return FillToTextObject(
+                    id,
+                    position,
+                    objectType,
+                    objectInfo, 
+                    optionalFields
+                    );
             default:
                 GD.PushError("Not determined object type!");
                 return null;
@@ -123,7 +203,10 @@ public class ObjectJsonElement  : JsonElement
     }
 
     private PointObject FillToPointObject(
-        ObjectInfo objectInfo,
+        int id,
+        Point position,
+        ObjectType type,
+        StandardObjectInfo objectInfo,
         Dictionary<string, object[]> optionalArrayFields,
         Godot.Collections.Dictionary elementDictionary
         ) {
@@ -157,7 +240,13 @@ public class ObjectJsonElement  : JsonElement
         }
         var points = Array.ConvertAll(boxedPoints, point => (Point)point);
         
-        return new PointObject(objectInfo, pointObjectType.GetValueOrDefault(), points);
+        return new PointObject(
+            id,
+            position,
+            type,
+            objectInfo, 
+            pointObjectType.GetValueOrDefault(), 
+            points);
     }
 
     private PointObjectType? DeterminePointObjectType(Godot.Collections.Dictionary elementDictionary) {
@@ -170,14 +259,24 @@ public class ObjectJsonElement  : JsonElement
         return null;
     }
 
-    private ShapeObject FillToShapeObject(ObjectInfo objectInfo, Godot.Collections.Dictionary elementDictionary) {
+    private ShapeObject FillToShapeObject(
+        int id,
+        Point position,
+        ObjectType type,
+        StandardObjectInfo objectInfo, 
+        Godot.Collections.Dictionary elementDictionary) {
         ShapeObjectType? shapeObjectType = DetermineShapeObjectType(elementDictionary);
         if (shapeObjectType == null) {
             GD.PushError("Shape object type is not determined!");
             return null;
         }
 
-        return new ShapeObject(objectInfo, shapeObjectType.GetValueOrDefault());
+        return new ShapeObject(
+            id,
+            position,
+            type,
+            objectInfo, 
+            shapeObjectType.GetValueOrDefault());
     }
 
     private ShapeObjectType? DetermineShapeObjectType(Godot.Collections.Dictionary elementDictionary) {
@@ -191,7 +290,10 @@ public class ObjectJsonElement  : JsonElement
     }
 
     private DefaultObject FillToDefaultObject(
-        ObjectInfo objectInfo, 
+        int id,
+        Point position,
+        ObjectType type,
+        StandardObjectInfo objectInfo, 
         Dictionary<string, object> optionalElementaryTypeFields,
         Dictionary<string, object[]> optionalArrayFields
         ) {
@@ -201,17 +303,29 @@ public class ObjectJsonElement  : JsonElement
             return null;
         }
         
-        Property[] properties = (Property[])optionalArrayFields["properties"];
+        Property[] properties = null;
+        object[] boxedProperties = optionalArrayFields["properties"];
+        if (boxedProperties != null)
+            properties = Array.ConvertAll(optionalArrayFields["properties"], property => (Property)property);
         if (properties == null) {
             GD.PushError("Parsed properties array of the default object is null!");
             return null;
         }
 
-        return new DefaultObject(objectInfo, gID ?? 0u, properties);
+        return new DefaultObject(
+            id,
+            position,
+            type,
+            objectInfo, 
+            gID ?? 0u, 
+            properties);
     }
 
     private TextObject FillToTextObject(
-        ObjectInfo objectInfo,
+        int id,
+        Point position,
+        ObjectType type,
+        StandardObjectInfo objectInfo,
         Dictionary<string, object> optionalFields
     ) {
         Text? text = (Text?)optionalFields["text"];
@@ -220,6 +334,11 @@ public class ObjectJsonElement  : JsonElement
             return null;
         }
 
-        return new TextObject(objectInfo, text.GetValueOrDefault());
+        return new TextObject(
+            id,
+            position,
+            type,
+            objectInfo, 
+            text.GetValueOrDefault());
     }
 }

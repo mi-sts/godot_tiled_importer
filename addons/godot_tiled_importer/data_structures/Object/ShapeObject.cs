@@ -5,10 +5,16 @@ public enum ShapeObjectType {
     Ellipse, Rectangle, Point
 }
 
-public class ShapeObject : Object {
+public class ShapeObject : StandardObject {
     public ShapeObjectType shapeType { get; private set; }
 
-    public ShapeObject(ObjectInfo objectInfo, ShapeObjectType shapeType) : base(objectInfo) {
+    public ShapeObject(
+        int id, 
+        Point coordinates, 
+        ObjectType type, 
+        StandardObjectInfo objectInfo, 
+        ShapeObjectType shapeType
+        ) : base(id, coordinates, type, objectInfo) {
         this.shapeType = shapeType;
     }
 }

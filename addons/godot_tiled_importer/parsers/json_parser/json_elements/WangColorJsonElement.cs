@@ -44,7 +44,9 @@ public class WangColorJsonElement : JsonElement
             GD.PushError("Dictionary of the optional array fields is null!");
             return null;
         }
-        wangColorInfo.properties = (Property[])optionalArrayFields["propertires"];
+        object[] boxedProperties = optionalArrayFields["properties"];
+        if (boxedProperties != null)
+            wangColorInfo.properties = Array.ConvertAll(boxedProperties, property => (Property)property);
     
         return new WangColor(wangColorInfo);
     }

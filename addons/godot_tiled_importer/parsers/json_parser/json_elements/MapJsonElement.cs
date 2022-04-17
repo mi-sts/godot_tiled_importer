@@ -90,8 +90,9 @@ public class MapJsonElement : JsonElement
             GD.PushError("Dictionary of the optional array fields is null!");
             return null;
         }
-        if (optionalArrayFields["properties"] != null) { 
-            mapInfo.properties = Array.ConvertAll(optionalArrayFields["properties"], property => (Property)property);
+        object[] boxedProperties = optionalArrayFields["properties"];
+        if (boxedProperties != null) { 
+            mapInfo.properties = Array.ConvertAll(boxedProperties, property => (Property)property);
         }
 
 

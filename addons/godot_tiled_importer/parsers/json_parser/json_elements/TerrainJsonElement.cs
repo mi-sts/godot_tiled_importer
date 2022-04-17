@@ -39,7 +39,10 @@ public class TerrainJsonElement : JsonElement
             GD.PushError("Dictionary of the optional array fields is null!");
             return null;
         }
-        Property[] properties = (Property[])optionalArrayFields["properties"];
+        Property[] properties = null;
+        object[] boxedProperties = optionalArrayFields["properties"];
+        if (boxedProperties != null)
+            properties = Array.ConvertAll(optionalArrayFields["properties"], property => (Property)property);
 
         return new Terrain(name, tileID, properties);
     }

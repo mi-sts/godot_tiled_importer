@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using GodotCollectionsExtensions;
 
-public class ChunkJsonElement : JsonElement
+public class ChunkInfoJsonElement : JsonElement
 {
     protected override Dictionary<string, ElementaryType> RequiredElementaryTypeFieldsNames { 
         get
@@ -30,7 +30,11 @@ public class ChunkJsonElement : JsonElement
         var position = new IntPoint(xCoordinate, yCoordinate);
         string data = (string)requiredElementaryTypeFields["data"];
         TileLayerData parsedData = ParserUtils.ParseLayerData(data, width, height, Encoding.CSV);
-        
+        if (parsedData == null) {
+            GD.PushError("Parsed chunk data is null!");
+            return null;
+        }
+
         return new Chunk(parsedData, width, height, position);
     }
 }

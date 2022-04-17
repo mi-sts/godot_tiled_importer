@@ -42,8 +42,6 @@ public abstract class JsonElement
                 return new LayerJsonElement();
             case DataStructure.Object:
                 return new ObjectJsonElement();
-            case DataStructure.Chunk:
-                return new ChunkJsonElement();
             case DataStructure.Frame:
                 return new FrameJsonElement();
             case DataStructure.Grid:
@@ -201,6 +199,9 @@ public abstract class JsonElement
         foreach (string name in RequiredElementaryTypeFieldsNames.Keys) {
             object requiredElementaryTypeFieldObject = elementDictionary.TryGet(name);
             if (requiredElementaryTypeFieldObject == null) {
+                foreach (string q in RequiredElementaryTypeFieldsNames.Keys) {
+                    GD.Print(q, " -  ", elementDictionary.TryGet(q));
+                }
                 GD.PushError("Value of the required elementary type field  is null!");
                 return null;
             }
