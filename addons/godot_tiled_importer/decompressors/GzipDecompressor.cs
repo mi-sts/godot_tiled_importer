@@ -3,10 +3,12 @@ using System;
 using System.IO;
 using System.IO.Compression;
 
-public class GzipDecompressor : Decompressor
-{
-    public override byte[] Decompress(byte[] compressedData) 
-    {
+public class GZipDecompressor : Decompressor {
+    public override byte[] Decompress(byte[] compressedData) {
+        if (compressedData == null) {
+            GD.PushError("Decompressing data is null!");
+            return null;
+        }
         var compressedDataStream = new MemoryStream(compressedData);
         var decompressedDataStream = new MemoryStream();
 
