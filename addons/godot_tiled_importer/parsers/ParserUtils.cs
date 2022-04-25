@@ -1,16 +1,27 @@
 using System;
+using System.Linq;
 using Godot;
+using TiledImporter.Structures;
+using TiledImporter.Decoders;
 
-public static class ParserUtils {
-    public static int? ToInt(object data) {
+namespace TiledImporter.Parsers {
+public static class ParserUtils
+{
+    public static int? ToInt(object data)
+    {
         int? converted = null;
-        try {
+        try
+        {
             converted = Convert.ToInt32(data);
-        } catch (Exception exception) {
-            if (exception is FormatException || exception is InvalidCastException) {
+        }
+        catch (Exception exception)
+        {
+            if (exception is FormatException || exception is InvalidCastException)
+            {
                 GD.PushError("Can't convert to int!");
             }
-            else if (exception is OverflowException) {
+            else if (exception is OverflowException)
+            {
                 GD.PushError("Parsing value is out of the range of int!");
             }
         }
@@ -18,15 +29,21 @@ public static class ParserUtils {
         return converted;
     }
 
-    public static uint? ToUInt(object data) {
+    public static uint? ToUInt(object data)
+    {
         uint? converted = null;
-        try {
+        try
+        {
             converted = Convert.ToUInt32(data);
-        } catch (Exception exception) {
-            if (exception is FormatException || exception is InvalidCastException) {
+        }
+        catch (Exception exception)
+        {
+            if (exception is FormatException || exception is InvalidCastException)
+            {
                 GD.PushError("Can't convert to uint!");
             }
-            else if (exception is OverflowException) {
+            else if (exception is OverflowException)
+            {
                 GD.PushError("Parsing value is out of the range of uint!");
             }
         }
@@ -34,15 +51,21 @@ public static class ParserUtils {
         return converted;
     }
 
-    public static double? ToDouble(object data) {
+    public static double? ToDouble(object data)
+    {
         double? converted = null;
-        try {
+        try
+        {
             converted = Convert.ToDouble(data);
-        } catch (Exception exception) {
-            if (exception is FormatException || exception is InvalidCastException) {
+        }
+        catch (Exception exception)
+        {
+            if (exception is FormatException || exception is InvalidCastException)
+            {
                 GD.PushError("Can't convert to dpuble!");
             }
-            else if (exception is OverflowException) {
+            else if (exception is OverflowException)
+            {
                 GD.PushError("Parsing value is out of the range of double!");
             }
         }
@@ -50,15 +73,21 @@ public static class ParserUtils {
         return converted;
     }
 
-    public static ushort? ToUShort(object data) {
+    public static ushort? ToUShort(object data)
+    {
         ushort? converted = null;
-        try {
+        try
+        {
             converted = Convert.ToUInt16(data);
-        } catch (Exception exception) {
-            if (exception is FormatException || exception is InvalidCastException) {
+        }
+        catch (Exception exception)
+        {
+            if (exception is FormatException || exception is InvalidCastException)
+            {
                 GD.PushError("Can't convert to ushort!");
             }
-            else if (exception is OverflowException) {
+            else if (exception is OverflowException)
+            {
                 GD.PushError("Parsing value is out of the range of ushort!");
             }
         }
@@ -66,25 +95,33 @@ public static class ParserUtils {
         return converted;
     }
 
-    public static bool? ToBool(object data) {
+    public static bool? ToBool(object data)
+    {
         bool? converted = null;
-        try {
+        try
+        {
             converted = Convert.ToBoolean(data);
-        } catch (Exception exception) { 
-            if (exception is FormatException || exception is InvalidCastException) {
+        }
+        catch (Exception exception)
+        {
+            if (exception is FormatException || exception is InvalidCastException)
+            {
                 GD.PushError("Can't convert to bool!");
-            } 
+            }
         }
 
         return converted;
     }
 
-    public static string ToString(object data) {
+    public static string ToString(object data)
+    {
         return Convert.ToString(data);
     }
 
-    public static MapOrientation? DetermineMapOrientation(string orientation) {
-        switch (orientation) {
+    public static MapOrientation? DetermineMapOrientation(string orientation)
+    {
+        switch (orientation)
+        {
             case "orthogonal":
                 return MapOrientation.Orthogonal;
             case "isometric":
@@ -99,8 +136,10 @@ public static class ParserUtils {
         }
     }
 
-    public static LayerType? DetermineLayerType(string type) {
-        switch (type) {
+    public static LayerType? DetermineLayerType(string type)
+    {
+        switch (type)
+        {
             case "tilelayer":
                 return LayerType.TileLayer;
             case "objectgroup":
@@ -115,8 +154,10 @@ public static class ParserUtils {
         }
     }
 
-    public static Compression? DetermineCompression(string compression) {
-        switch (compression) {
+    public static Compression? DetermineCompression(string compression)
+    {
+        switch (compression)
+        {
             case "zlib":
                 return Compression.ZLib;
             case "gzip":
@@ -131,8 +172,10 @@ public static class ParserUtils {
         }
     }
 
-    public static Encoding? DetermineEncoding(string encoding) {
-        switch (encoding) {
+    public static Encoding? DetermineEncoding(string encoding)
+    {
+        switch (encoding)
+        {
             case "csv":
                 return Encoding.CSV;
             case "base64":
@@ -143,8 +186,10 @@ public static class ParserUtils {
         }
     }
 
-    public static DrawOrder? DetermineDrawOrder(string drawOrder) {
-        switch (drawOrder) {
+    public static DrawOrder? DetermineDrawOrder(string drawOrder)
+    {
+        switch (drawOrder)
+        {
             case "topdown":
                 return DrawOrder.TopDown;
             case "index":
@@ -155,8 +200,10 @@ public static class ParserUtils {
         }
     }
 
-    public static PropertyType? DeterminePropertyType(string type) {
-        switch (type) {
+    public static PropertyType? DeterminePropertyType(string type)
+    {
+        switch (type)
+        {
             case "string":
                 return PropertyType.String;
             case "int":
@@ -179,8 +226,10 @@ public static class ParserUtils {
         }
     }
 
-    public static HorizontalAlignment? DetermineHorizontalAlignment(string alignment) {
-        switch (alignment) {
+    public static HorizontalAlignment? DetermineHorizontalAlignment(string alignment)
+    {
+        switch (alignment)
+        {
             case "center":
                 return HorizontalAlignment.Center;
             case "right":
@@ -195,8 +244,10 @@ public static class ParserUtils {
         }
     }
 
-    public static VerticalAlignment? DetermineVerticalAlignment(string alignment) {
-        switch (alignment) {
+    public static VerticalAlignment? DetermineVerticalAlignment(string alignment)
+    {
+        switch (alignment)
+        {
             case "center":
                 return VerticalAlignment.Center;
             case "bottom":
@@ -209,8 +260,10 @@ public static class ParserUtils {
         }
     }
 
-    public static StaggerAxis? DetermineStaggerAxis(string staggerAxis) {
-        switch (staggerAxis) {
+    public static StaggerAxis? DetermineStaggerAxis(string staggerAxis)
+    {
+        switch (staggerAxis)
+        {
             case "x":
                 return StaggerAxis.X;
             case "y":
@@ -221,8 +274,10 @@ public static class ParserUtils {
         }
     }
 
-    public static StaggerIndex? DetermineStaggerIndex(string staggerIndex) {
-        switch (staggerIndex) {
+    public static StaggerIndex? DetermineStaggerIndex(string staggerIndex)
+    {
+        switch (staggerIndex)
+        {
             case "odd":
                 return StaggerIndex.Odd;
             case "even":
@@ -233,8 +288,10 @@ public static class ParserUtils {
         }
     }
 
-    public static RenderOrder? DetermineRenderOrder(string renderOrder) {
-        switch (renderOrder) {
+    public static RenderOrder? DetermineRenderOrder(string renderOrder)
+    {
+        switch (renderOrder)
+        {
             case "right-down":
                 return RenderOrder.RightDown;
             case "right-up":
@@ -249,8 +306,10 @@ public static class ParserUtils {
         }
     }
 
-    public static WangSetType? DetermineWangSetType(string type) {
-        switch (type) {
+    public static WangSetType? DetermineWangSetType(string type)
+    {
+        switch (type)
+        {
             case "corner":
                 return WangSetType.Corner;
             case "edge":
@@ -263,8 +322,10 @@ public static class ParserUtils {
         }
     }
 
-    public static GridOrientation? DetermineGridOrientation(string orientation) {
-        switch (orientation) {
+    public static GridOrientation? DetermineGridOrientation(string orientation)
+    {
+        switch (orientation)
+        {
             case "orthogonal":
                 return GridOrientation.Orthogonal;
             case "isometric":
@@ -275,8 +336,10 @@ public static class ParserUtils {
         }
     }
 
-    public static TileObjectsAlignment? DetermineTileObjectsAlignment(string alignment) {
-        switch (alignment) {
+    public static TileObjectsAlignment? DetermineTileObjectsAlignment(string alignment)
+    {
+        switch (alignment)
+        {
             case "unspecified":
                 return TileObjectsAlignment.Uncspecified;
             case "topleft":
@@ -303,8 +366,10 @@ public static class ParserUtils {
         }
     }
 
-    public static Color? ParseColor(string colorHexCode) {
-        if (colorHexCode == null) {
+    public static Color? ParseColor(string colorHexCode)
+    {
+        if (colorHexCode == null)
+        {
             GD.PushError("Parsing color hex code string is null!");
             return null;
         }
@@ -312,25 +377,31 @@ public static class ParserUtils {
         return new Color(colorHexCode);
     }
 
-    public static ushort[] ParseWangID(Godot.Collections.Array wangIDArray) {
+    public static ushort[] ParseWangID(Godot.Collections.Array wangIDArray)
+    {
         var wangID = new ushort[8];
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 8; ++i)
+        {
             ushort? wangIDIndex = ToUShort(wangIDArray[i]);
-            if (wangIDIndex == null) {
+            if (wangIDIndex == null)
+            {
                 GD.PushError("Can't parse a wang id index!");
                 return null;
             }
-            wangID[i] = wangIDIndex.GetValueOrDefault(); 
+            wangID[i] = wangIDIndex.GetValueOrDefault();
         }
 
         return wangID;
     }
 
-    public static int[] ParseTerrainIndex(Godot.Collections.Array terrainIndexArray) {
+    public static int[] ParseTerrainIndex(Godot.Collections.Array terrainIndexArray)
+    {
         var terrainIndex = new int[4];
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i)
+        {
             int? terrainIndexElement = ToInt(terrainIndexArray[i]);
-            if (terrainIndexElement == null) {
+            if (terrainIndexElement == null)
+            {
                 GD.PushError("Can't parse a terrain index element!");
                 return null;
             }
@@ -340,18 +411,23 @@ public static class ParserUtils {
         return terrainIndex;
     }
 
-    public static TileLayerData ParseLayerData(string data, int layerWidth, int layerHeight, Encoding encoding, Compression compression = Compression.None) {
-        switch (encoding) {
+    public static TileLayerData ParseLayerData(object data, int layerWidth, int layerHeight, Encoding encoding, Compression compression = Compression.None)
+    {
+        switch (encoding)
+        {
             case Encoding.CSV:
                 if (compression != Compression.None) {
                     GD.PushError("CSV format can't be compressed!");
                 }
-                return new CSVDecoder().Decode(data, layerWidth, layerHeight);
+                object[] dataArrayElements = (data as Godot.Collections.Array).Cast<object>().ToArray();
+                uint[] tileIDs = Array.ConvertAll(dataArrayElements, element => ParserUtils.ToUInt(element) ?? 0u);
+                return new CSVDecoder().Decode(tileIDs, layerWidth, layerHeight);
             case Encoding.Base64:
-                return new Base64Decoder().Decode(data, layerWidth, layerHeight, compression);
+                return new Base64Decoder().Decode(ParserUtils.ToString(data), layerWidth, layerHeight, compression);
             default:
                 GD.PushError("Not determined encoding!");
                 return null;
         }
     }
+}
 }
