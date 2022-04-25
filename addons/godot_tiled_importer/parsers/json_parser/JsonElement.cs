@@ -116,7 +116,7 @@ namespace TiledImporter.Parsers
                 parsedFields[name] = parsedField;
             }
 
-            return null;
+            return parsedFields;
         }
 
         // Parses fields that are optional for this json dictionary. Returns array of JsonElement.
@@ -217,8 +217,6 @@ namespace TiledImporter.Parsers
                 return null;
             }
 
-        if (elementDictionary is null) {
-            GD.PushError("Parsing dictionary is null!");
             var parsedFields = new Dictionary<string, object>();
             foreach (string name in RequiredElementaryTypeFieldsNames.Keys)
             {
@@ -239,6 +237,7 @@ namespace TiledImporter.Parsers
                 parsedFields[name] = parsedField;
             }
 
+            return parsedFields;
         }
 
         // Parses elementary fields that are optional for this json dictionary. Returns an array of elementary type values.
@@ -250,6 +249,8 @@ namespace TiledImporter.Parsers
                 GD.PushError("Parsing dictionary is null!");
                 return null;
             }
+
+            var parsedFields = new Dictionary<string, object>();
             foreach (string name in OptionalElementaryTypeFieldsNames.Keys)
             {
                 object optionalElementaryTypeFieldObject = elementDictionary.TryGet(name);
@@ -279,6 +280,8 @@ namespace TiledImporter.Parsers
             {
                 GD.PushError("Parsing array is null!");
                 return null;
+            }
+
             var parsedArrayElements = new List<object>();
             foreach (object arrayElement in array)
             {
@@ -286,6 +289,8 @@ namespace TiledImporter.Parsers
                 if (fieldDicitonary == null)
                 {
                     GD.PushError("Value of the array element dictionary is null!");
+                    return null;
+                }
 
                 object parsedField = fieldJsonElement.Parse(fieldDicitonary);
                 if (parsedField == null)
@@ -299,9 +304,6 @@ namespace TiledImporter.Parsers
             return parsedArrayElements.ToArray();
         }
 
-        var parsedRequiredArrayFields = new Dictionary<string, object[]>();
-        foreach (string name in RequiredArrayFieldsNames.Keys) {
-            object requiredFieldObject = elementDicitonary.TryGet(name);
         // Parses array fields that must be present in this json dictionary. Returns an array of JsonElement.
         protected Dictionary<string, object[]> ParseRequiredArrayFields(Godot.Collections.Dictionary elementDicitonary)
         {
@@ -335,6 +337,8 @@ namespace TiledImporter.Parsers
         {
             if (elementDictionary == null)
             {
+                GD.PushError("Parsing dictionary is null!");
+                return null;
             }
 
             var parsedOptionalArrayFields = new Dictionary<string, object[]>();
@@ -351,6 +355,7 @@ namespace TiledImporter.Parsers
                 else
                 {
                     parsedOptionalArrayFields[name] = null;
+                }
             }
 
             return parsedOptionalArrayFields;
