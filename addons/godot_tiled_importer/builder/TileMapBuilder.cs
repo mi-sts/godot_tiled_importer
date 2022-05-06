@@ -26,9 +26,17 @@ public class TileMapBuilder
                 mapNode.Mode = ConvertMapOrientationToMapMode(mapData.mapOrientation);
                 mapNode.CellSize = new Vector2(mapData.tileWidth, mapData.tileHeight);
                 mapNode.TileSet = mapTileSet;
-                var data = ((Structures.TileLayer)layerData).data;
-                DrawMap(mapNode, data);
-                
+                var tileLayerData = layerData as Structures.TileLayer;
+                switch (tileLayerData.tileLayerType) {
+                    case Structures.TileLayerType.Infinite:
+                        foreach (Structures.Chunk chunk in tileLayerData.chunks) {
+                            DrawChunk(mapNode, chunk.data, chunk.position);
+                        }
+                        break;
+                    case Structures.TileLayerType.NotInfinite:
+                        DrawChunk(mapNode, tileLayerData.data, Structures.IntPoint.Zero);
+                        break;
+                }                
                 rootNode.AddChild(mapNode);
                 mapNode.Owner = rootNode;
             }
@@ -63,9 +71,10 @@ public class TileMapBuilder
         return tileSet;
     }
 
-    private void DrawMap(
+    private void DrawChunk(
         Godot.TileMap mapNode, 
-        Structures.TileLayerData tileLayerData
+        Structures.TileLayerData tileLayerData,
+        Structures.IntPoint chunkPosition
         ) {
         HashSet<int> tilesGIDsSet = mapNode.TileSet.GetTilesIds().Cast<int>().ToHashSet<int>();
         HashSet<int> atlasFirstTilesGIDsSet = atlasFirstGIDs.ToHashSet<int>();
@@ -75,8 +84,8 @@ public class TileMapBuilder
 
             if (tilesGIDsSet.Contains((int)tileData.gID) && !atlasFirstTilesGIDsSet.Contains((int)tileData.gID)) { // If drawing tile is a sigle tile.
                 mapNode.SetCell(
-                    tileData.position.x, 
-                    tileData.position.y,
+                    chunkPosition.x + tileData.position.x, 
+                    chunkPosition.y + tileData.position.y,
                     (int)tileData.gID,
                     tileData.horizontallyFlipped,
                     tileData.verticallyFlipped,
@@ -88,8 +97,8 @@ public class TileMapBuilder
                 int atlasTileLocalID = (int)tileData.gID - atlasFirstGID;
                 int atlasWidth = atlasesWidth[atlasFirstGID];
                 mapNode.SetCell(
-                    tileData.position.x, 
-                    tileData.position.y,
+                    chunkPosition.x + tileData.position.x, 
+                    chunkPosition.y + tileData.position.y,
                     atlasFirstGID,
                     tileData.horizontallyFlipped,
                     tileData.verticallyFlipped,

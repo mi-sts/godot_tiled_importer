@@ -3,6 +3,10 @@ using System;
 
 namespace TiledImporter.Structures
 {
+    public enum TileLayerType {
+        Infinite, NotInfinite
+    }
+
     public class TileLayer : Layer
     {
 
@@ -10,6 +14,7 @@ namespace TiledImporter.Structures
         public Chunk[] chunks { get; private set; } // Array of chunks (for infinite maps). 
         public int width { get; private set; }
         public int height { get; private set; }
+        public TileLayerType tileLayerType;
 
         public TileLayer(LayerInfo layerInfo, int width, int height, TileLayerData data) : base(layerInfo)
         {
@@ -21,6 +26,7 @@ namespace TiledImporter.Structures
             this.data = data;
             this.width = width;
             this.height = height;
+            tileLayerType = TileLayerType.NotInfinite;
         }
 
         public TileLayer(LayerInfo layerInfo, int width, int height, Chunk[] chunks) : base(layerInfo)
@@ -33,6 +39,7 @@ namespace TiledImporter.Structures
             this.chunks = chunks;
             this.width = width;
             this.height = height;
+            tileLayerType = TileLayerType.Infinite;
         }
     }
 }
