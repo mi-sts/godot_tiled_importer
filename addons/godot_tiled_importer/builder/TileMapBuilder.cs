@@ -23,6 +23,7 @@ public class TileMapBuilder
         foreach (Structures.Layer layerData in mapData.layers) {
             if (layerData is Structures.TileLayer) {    
                 var mapNode = new Godot.TileMap();
+                mapNode.Mode = ConvertMapOrientationToMapMode(mapData.mapOrientation);
                 mapNode.CellSize = new Vector2(mapData.tileWidth, mapData.tileHeight);
                 mapNode.TileSet = mapTileSet;
                 var data = ((Structures.TileLayer)layerData).data;
@@ -35,6 +36,22 @@ public class TileMapBuilder
         
         packedScene.Pack(rootNode);
         ResourceSaver.Save($"res://tile_map_scene_.tscn", packedScene);
+    }
+
+    private Godot.TileMap.ModeEnum ConvertMapOrientationToMapMode(Structures.MapOrientation orientation) {
+        switch (orientation) {
+            case Structures.MapOrientation.Orthogonal:
+                return Godot.TileMap.ModeEnum.Square;
+            case Structures.MapOrientation.Staggered:
+                return Godot.TileMap.ModeEnum.Isometric;
+            case Structures.MapOrientation.Isometric:
+                return Godot.TileMap.ModeEnum.Isometric;
+            case Structures.MapOrientation.Hexagonal:
+                return Godot.TileMap.ModeEnum.Square;
+            default:
+                GD.Print("Not determined orientation of the tile map!");
+                return Godot.TileMap.ModeEnum.Square;
+        }
     }
 
     private Godot.TileSet CreateMapTileSet(Structures.TileSet[] tileSetsData) {
@@ -132,6 +149,10 @@ public class TileMapBuilder
             tileSetNode.TileSetTileMode(firstGID + tileData.id, TileSet.TileMode.SingleTile);
             tileSetNode.TileSetTexture(firstGID + tileData.id, tileTexture);
             tileSetNode.TileSetRegion(firstGID + tileData.id, new Rect2(0f, 0f, tileTexture.GetWidth(), tileTexture.GetHeight()));
+            tileSetNode.TileSetTextureOffset(
+                firstGID, 
+                new Vector2(tileSetData.tileOffset?.x ?? 0, tileSetData.tileOffset?.y ?? 0)
+            );
             tileSetNode.TileSetName(firstGID + tileData.id, $"{tileSetData.name}_{tileData.id}");
         }
     }
@@ -151,9 +172,18 @@ public class TileMapBuilder
         tileSetNode.CreateTile(firstGID);
         tileSetNode.TileSetTileMode(firstGID, Godot.TileSet.TileMode.AtlasTile);
         tileSetNode.TileSetTexture(firstGID, texture);
-        tileSetNode.TileSetRegion(firstGID, new Rect2(0f, 0f, tileSetData.imageWidth, tileSetData.imageHeight));
+        tileSetNode.TileSetRegion(
+            firstGID, 
+            new Rect2(
+                tileSetData.spacing, 
+                tileSetData.spacing, 
+                tileSetData.imageWidth + tileSetData.spacing, 
+                tileSetData.imageHeight + tileSetData.spacing
+            )
+        );
         tileSetNode.AutotileSetSize(firstGID, new Vector2(tileSetData.tileWidth, tileSetData.tileHeight));
         tileSetNode.TileSetName(firstGID, tileSetData.name);
+        tileSetNode.AutotileSetSpacing(firstGID, tileSetData.spacing);
 
         atlasFirstGIDs.Add(firstGID);
         atlasesWidth.Add(firstGID, tileSetData.columns);
