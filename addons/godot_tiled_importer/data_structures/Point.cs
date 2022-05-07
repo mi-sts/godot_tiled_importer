@@ -15,6 +15,18 @@ namespace TiledImporter.Structures
             this.x = x;
             this.y = y;
         }
+        
+        public static Point operator -(Point point) 
+            => new Point(-point.x, -point.y);
+
+        public static Point operator +(Point point)
+            => point;
+
+        public static Point operator +(Point firstPoint, Point secondPoint) 
+            => new Point(firstPoint.x + secondPoint.x, firstPoint.y + secondPoint.y);
+
+        public static Point operator -(Point firstPoint, Point secondPoint)
+            => firstPoint - secondPoint;
     }
 
     public struct IntPoint
@@ -29,5 +41,17 @@ namespace TiledImporter.Structures
             this.x = x;
             this.y = y;
         }
+
+        public static IntPoint operator -(IntPoint point) 
+            => new IntPoint(-point.x, -point.y);
+
+        public static IntPoint operator +(IntPoint point)
+            => point;
+
+        public static IntPoint operator +(IntPoint firstPoint, IntPoint secondPoint) 
+            => new IntPoint(firstPoint.x + secondPoint.x, firstPoint.y + secondPoint.y);
+
+        public static IntPoint operator -(IntPoint firstPoint, IntPoint secondPoint)
+            => firstPoint - secondPoint;
     }
 }
