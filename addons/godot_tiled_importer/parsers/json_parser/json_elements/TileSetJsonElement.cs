@@ -15,7 +15,7 @@ namespace TiledImporter.Parsers
             {
                 return new Dictionary<string, ElementaryType>() {
                 { "name", ElementaryType.String },
-                { "firstgid", ElementaryType.Int },
+                { "firstgid", ElementaryType.UInt },
                 { "margin", ElementaryType.Int },
                 { "spacing", ElementaryType.Int },
                 { "tilecount", ElementaryType.Int },
@@ -74,7 +74,7 @@ namespace TiledImporter.Parsers
             }
             var tileSetInfo = new TileSetInfo();
             tileSetInfo.name = (string)requiredElementaryTypeFields["name"];
-            tileSetInfo.firstGID = (int)requiredElementaryTypeFields["firstgid"];
+            tileSetInfo.firstGID = (uint)requiredElementaryTypeFields["firstgid"];
             tileSetInfo.margin = (int)requiredElementaryTypeFields["margin"];
             tileSetInfo.spacing = (int)requiredElementaryTypeFields["spacing"];
             tileSetInfo.tileCount = (int)requiredElementaryTypeFields["tilecount"];

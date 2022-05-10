@@ -17,10 +17,6 @@ namespace TiledImporter.Structures
             Property[] properties
             ) : base(id, position, type, objectInfo)
         {
-            if (properties == null)
-            {
-                GD.PushError("Properties of the default object are not initialized!");
-            }
             this.gID = gID;
             this.properties = properties ?? new Property[0];
         }

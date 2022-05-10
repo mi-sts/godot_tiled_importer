@@ -29,6 +29,8 @@ public class LayerJsonElement : JsonElement
         get
         {
             return new Dictionary<string, ElementaryType>() {
+                { "tintcolor", ElementaryType.Color },
+
                 // Image layer fields.
                 { "image", ElementaryType.String },
                 { "repeatx", ElementaryType.Bool },
@@ -62,7 +64,7 @@ public class LayerJsonElement : JsonElement
                 { "layers", DataStructure.Layer },
 
                 // Object group layer fields.
-                { "objects", DataStructure.Object }
+                { "objects", DataStructure.Object },
             };
         }
     }
@@ -102,6 +104,7 @@ public class LayerJsonElement : JsonElement
             GD.PushError("Dictionary of the optional elementary type fields is null!");
             return null;
         }
+        layerInfo.tintColor = (Color?)optionalElementaryTypeFields["tintcolor"];
         switch (layerInfo.type)
         {
             case LayerType.ImageLayer:

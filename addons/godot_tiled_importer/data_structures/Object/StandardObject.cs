@@ -18,12 +18,12 @@ namespace TiledImporter.Structures
 
     public abstract class StandardObject : Object
     {
-        public string name { get; private set; } // (for non-template objects).
-        public double width { get; private set; } // (for non-template objects).
-        public double height { get; private set; } // (for non-template objects).
-        public double rotation { get; private set; } // (for non-template objects).
-        public string type { get; private set; } // (for non-template objects).
-        public bool visible { get; private set; } // (for non-template objects).
+        public string name { get; private set; } 
+        public double width { get; private set; } 
+        public double height { get; private set; }
+        public double rotation { get; private set; }
+        public string type { get; private set; } 
+        public bool visible { get; private set; }
 
         public StandardObject(
             int id,

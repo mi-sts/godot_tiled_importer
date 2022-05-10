@@ -39,7 +39,7 @@ namespace TiledImporter.Parsers
                 return new Dictionary<string, DataStructure>() {
                 { "objectgroup", DataStructure.Layer },
                 { "grid", DataStructure.Grid },
-                { "terrain", DataStructure.Object }
+                { "terrain", DataStructure.Terrain}
             };
             }
         }

@@ -144,7 +144,6 @@ namespace TiledImporter.Parsers
             Dictionary<string, object> optionalFields,
             Dictionary<string, object[]> optionalArrayFields,
             Godot.Collections.Dictionary elementDictionary
-
         )
         {
             var objectInfo = new StandardObjectInfo();
@@ -179,6 +178,10 @@ namespace TiledImporter.Parsers
                 objectType = ObjectType.PointObject;
             }
             else if (optionalFields["text"] != null)
+            {
+                objectType = ObjectType.TextObject;
+            }
+            else if (optionalElementaryTypeFields["gid"] != null)
             {
                 objectType = ObjectType.DefaultObject;
             }
@@ -354,11 +357,6 @@ namespace TiledImporter.Parsers
             object[] boxedProperties = optionalArrayFields["properties"];
             if (boxedProperties != null)
                 properties = Array.ConvertAll(optionalArrayFields["properties"], property => (Property)property);
-            if (properties == null)
-            {
-                GD.PushError("Parsed properties array of the default object is null!");
-                return null;
-            }
 
             return new DefaultObject(
                 id,

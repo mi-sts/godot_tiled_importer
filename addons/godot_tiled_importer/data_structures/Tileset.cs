@@ -17,7 +17,7 @@ namespace TiledImporter.Structures
     public struct TileSetInfo
     {
         public string name;
-        public int? firstGID;
+        public uint? firstGID;
         public int? tileWidth;
         public int? tileHeight;
         public Tile[] tiles;
@@ -44,7 +44,7 @@ namespace TiledImporter.Structures
     public class TileSet
     {
         public string name { get; private set; }
-        public int firstGID { get; private set; }
+        public uint firstGID { get; private set; }
         public int tileWidth { get; private set; }
         public int tileHeight { get; private set; }
         public Tile[] tiles { get; private set; } // (optional).
@@ -102,7 +102,7 @@ namespace TiledImporter.Structures
                     break;
             }
             name = tileSetInfo.name;
-            firstGID = tileSetInfo.firstGID ?? -1;
+            firstGID = tileSetInfo.firstGID ?? 0u;
             image = tileSetInfo.image;
             imageHeight = tileSetInfo.imageHeight ?? 0;
             imageWidth = tileSetInfo.imageWidth ?? 0;
