@@ -12,7 +12,7 @@ namespace TiledImporter.Decoders
         protected const uint ROTATED_HEXAGONAL_120_FLAG = 0x10000000;
 
         // Decodes flip flags from the tile ID number (not cleared GID).
-        protected bool[] DecodeFlipFlags(uint tileID)
+        protected static bool[] DecodeFlipFlags(uint tileID)
         {
             bool[] flags = new bool[4];
             flags[0] = (tileID & FLIPPED_HORIZONTALLY_FLAG) != 0;
@@ -24,7 +24,7 @@ namespace TiledImporter.Decoders
         }
 
         // Clears flip flags bits in the tile ID number to recieve the GID number.
-        protected void ClearFlipFlagsBits(ref uint tileID)
+        protected static void ClearFlipFlagsBits(ref uint tileID)
         {
             tileID &= ~(FLIPPED_HORIZONTALLY_FLAG |
                                  FLIPPED_VERTICALLY_FLAG |
@@ -70,8 +70,26 @@ namespace TiledImporter.Decoders
             return new TileLayerData(tiles, layerWidth, layerHeight);
         }
 
+        public static TileData DecodeGID(uint tileID) {
+            bool[] tileFlags = DecodeFlipFlags(tileID);
+            ClearFlipFlagsBits(ref tileID);
+            bool horizontallyFlipped = tileFlags[0];
+            bool verticallyFlipped = tileFlags[1];
+            bool diagonallyFlipped = tileFlags[2];
+            bool rotated120 = tileFlags[3];
+
+            return new TileData(
+                tileID, 
+                IntPoint.Zero, 
+                horizontallyFlipped, 
+                verticallyFlipped,
+                diagonallyFlipped, 
+                rotated120
+                );
+        }
+
         // Extrudes flip flags from encoded tile IDs data and clear flag bits.
-        protected bool[][] DecodeFlipFlagsAndClear(ref uint[] tileIDs)
+        protected static bool[][] DecodeFlipFlagsAndClear(ref uint[] tileIDs)
         {
             bool[][] filpFlags = new bool[tileIDs.Length][];
             for (int x = 0; x < tileIDs.Length; ++x)

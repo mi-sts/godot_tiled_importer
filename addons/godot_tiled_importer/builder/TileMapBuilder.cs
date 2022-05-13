@@ -14,11 +14,11 @@ public class TileMapBuilder
 
     private Dictionary<int, int> atlasesWidth = new Dictionary<int, int>(); // key - atlas first GID, value - number of columns in the atlas. 
 
-    public void GenerateTileMap(Structures.Map mapData)
+    public PackedScene GenerateTileMapScene(Structures.Map mapData)
     {
         if (mapData == null) {
             GD.PushError("Data of the generating map is null!");
-            return;
+            return null;
         }
 
         var rootNode = new Godot.Node2D();
@@ -27,84 +27,111 @@ public class TileMapBuilder
         Godot.Node2D layerParentNode = null;
 
         foreach (Structures.Layer layerData in mapData.layers) {
-            if (layerData is Structures.TileLayer) {    
-                var tileLayerData = layerData as Structures.TileLayer;
-                switch (mapData.mapOrientation) {
-                    case Structures.MapOrientation.Hexagonal:
-                        var tileLayerParentNode = new Godot.Node2D();
-                        layerParentNode = tileLayerParentNode;
-                        rootNode.AddChild(tileLayerParentNode);
-                        tileLayerParentNode.Owner = rootNode;
-
-                        if (tileLayerData.tileLayerType == Structures.TileLayerType.Infinite) 
-                            foreach (Structures.Chunk chunk in tileLayerData.chunks) 
-                                DrawHexagonalChunk(chunk.data, chunk.position, tileLayerParentNode, rootNode, mapTileSet, mapData);
-                        else {
-                            DrawHexagonalChunk(
-                                tileLayerData.data, 
-                                Structures.IntPoint.Zero,
-                                tileLayerParentNode, 
-                                rootNode,
-                                mapTileSet, 
-                                mapData 
-                            );
-                        }
-                        
-                        break;
-                    default:
-                        var layerMapNode = new Godot.TileMap();
-                        layerParentNode = layerMapNode;
-                        layerMapNode.Mode = ConvertMapOrientationToMapMode(mapData.mapOrientation);
-                        layerMapNode.CellSize = new Vector2(mapData.tileWidth, mapData.tileHeight);
-                        layerMapNode.TileSet = mapTileSet;
-                        rootNode.AddChild(layerMapNode);
-                        layerMapNode.Owner = rootNode;
-                        
-                        if (tileLayerData.tileLayerType == Structures.TileLayerType.Infinite)
-                            foreach (Structures.Chunk chunk in tileLayerData.chunks) {
-                                DrawChunk(chunk.data, chunk.position, layerMapNode);
-                            }
-                        else
-                            DrawChunk(tileLayerData.data, Structures.IntPoint.Zero, layerMapNode);
-                        
-                        break;
-                }
-            } else if (layerData is Structures.ObjectGroupLayer) {
-                var objectLayerData = layerData as Structures.ObjectGroupLayer;                
-
-                var objectLayerParentNode = new Godot.Node2D();
-                layerParentNode = objectLayerParentNode;
-                rootNode.AddChild(objectLayerParentNode);
-                objectLayerParentNode.Owner = rootNode;
-
-                foreach (Structures.Object objectData in objectLayerData.objects) {
-                    if (objectData is Structures.DefaultObject) {
-                        var defaultObjectData = objectData as Structures.DefaultObject;
-                        DrawSpriteTile(
-                            defaultObjectData.gID,
-                            new Vector2(
-                                (float)defaultObjectData.coordinates.x, 
-                                (float)defaultObjectData.coordinates.y
-                            ),
-                            (float)defaultObjectData.rotation,
-                            false,
-                            false,
-                            mapTileSet,
-                            objectLayerParentNode,
-                            rootNode,
-                            new Vector2((float)defaultObjectData.width, (float)defaultObjectData.height)
-                        );
-                    }
-                }
+            if (layerData is Structures.TileLayer tileLayerData) {
+                BuildTileLayer(tileLayerData, mapData, mapTileSet, layerParentNode, rootNode);
+            } else if (layerData is Structures.ObjectGroupLayer objectLayerData) {
+                BuildObjectGroupLayer(objectLayerData, mapTileSet, layerParentNode, rootNode);
             }
             layerParentNode.Modulate = new Color(layerData.tintColor ?? new Color(1, 1, 1), (float)layerData.opacity);
             layerParentNode.Name = layerData.name;
         }
 
         packedScene.Pack(rootNode);
-        ResourceSaver.Save($"res://tile_map_scene_.tscn", packedScene);
+        return packedScene;
     }
 
+    private void BuildTileLayer(
+        Structures.TileLayer tileLayerData,
+        Structures.Map mapData,
+        Godot.TileSet mapTileSet,
+        Godot.Node2D layerParentNode,
+        Godot.Node2D rootNode
+        ) {
+        switch (mapData.mapOrientation) {
+            case Structures.MapOrientation.Hexagonal:
+                var tileLayerParentNode = new Godot.Node2D();
+                layerParentNode = tileLayerParentNode;
+                rootNode.AddChild(tileLayerParentNode);
+                tileLayerParentNode.Owner = rootNode;
+
+                if (tileLayerData.tileLayerType == Structures.TileLayerType.Infinite) 
+                    foreach (Structures.Chunk chunk in tileLayerData.chunks) 
+                        DrawHexagonalChunk(chunk.data, chunk.position, tileLayerParentNode, rootNode, mapTileSet, mapData);
+                else {
+                    DrawHexagonalChunk(
+                        tileLayerData.data, 
+                        Structures.IntPoint.Zero,
+                        tileLayerParentNode, 
+                        rootNode,
+                        mapTileSet, 
+                        mapData 
+                    );
+                }
+                
+                break;
+            default:
+                var layerMapNode = new Godot.TileMap();
+                layerParentNode = layerMapNode;
+                layerMapNode.Mode = ConvertMapOrientationToMapMode(mapData.mapOrientation);
+                layerMapNode.CellSize = new Vector2(mapData.tileWidth, mapData.tileHeight);
+                layerMapNode.TileSet = mapTileSet;
+                rootNode.AddChild(layerMapNode);
+                layerMapNode.Owner = rootNode;
+                
+                if (tileLayerData.tileLayerType == Structures.TileLayerType.Infinite)
+                    foreach (Structures.Chunk chunk in tileLayerData.chunks) {
+                        DrawChunk(chunk.data, chunk.position, layerMapNode);
+                    }
+                else
+                    DrawChunk(tileLayerData.data, Structures.IntPoint.Zero, layerMapNode);
+                
+                break;
+        }
+    }
+
+    private void BuildObjectGroupLayer(
+        Structures.ObjectGroupLayer objectLayerData,
+        Godot.TileSet mapTileSet,
+        Godot.Node2D layerParentNode,
+        Godot.Node2D rootNode
+    ) {
+        var objectLayerParentNode = new Godot.Node2D();
+        layerParentNode = objectLayerParentNode;
+        rootNode.AddChild(objectLayerParentNode);
+        objectLayerParentNode.Owner = rootNode;
+        Structures.Object[] orderedObjects = 
+            GetObjectsOrderedByDrawOrder(objectLayerData.objects, objectLayerData.drawOrder);
+        foreach (Structures.Object objectData in orderedObjects) {
+            if (objectData is Structures.TileObject tileObjectData) {
+                DrawSpriteTile(
+                    tileObjectData.objectTileData.gID,
+                    new Vector2(
+                        (float)tileObjectData.coordinates.x, 
+                        (float)tileObjectData.coordinates.y
+                    ),
+                    (float)tileObjectData.rotation,
+                    tileObjectData.objectTileData.horizontallyFlipped,
+                    tileObjectData.objectTileData.verticallyFlipped,
+                    mapTileSet,
+                    objectLayerParentNode,
+                    rootNode,
+                    new Vector2((float)tileObjectData.width, (float)tileObjectData.height)
+                );
+            }
+        }
+    }
+    
+    private Structures.Object[] GetObjectsOrderedByDrawOrder(Structures.Object[] objects, Structures.DrawOrder drawOrder) {
+        switch (drawOrder) {
+            case Structures.DrawOrder.TopDown:
+                return objects.OrderBy(objectData => objectData.coordinates.y).ToArray(); 
+            case Structures.DrawOrder.Index:
+                return objects;
+            default:
+                GD.PushError("Not determined draw order!");
+                return null;
+        }
+    }
     private Godot.TileMap.ModeEnum ConvertMapOrientationToMapMode(Structures.MapOrientation orientation) {
         switch (orientation) {
             case Structures.MapOrientation.Orthogonal:
@@ -230,6 +257,7 @@ public class TileMapBuilder
         Godot.Node2D rootNode,
         Vector2? spriteSize = null
         ) {
+        GD.Print(tileGID);
         var spriteTile = new Godot.Sprite();
         spriteTile.RotationDegrees = rotation;
         spriteTile.FlipH = horizontallyFlipped;

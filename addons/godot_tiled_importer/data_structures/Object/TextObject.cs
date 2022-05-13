@@ -3,7 +3,7 @@ using System;
 
 namespace TiledImporter.Structures
 {
-    public class TextObject : StandardObject
+    public class TextObject : DefaultObject
     {
         public Text text { get; private set; }
 
@@ -11,7 +11,7 @@ namespace TiledImporter.Structures
             int id,
             Point coordinates,
             ObjectType type,
-            StandardObjectInfo objectInfo,
+            DefaultObjectInfo objectInfo,
             Text text) : base(id, coordinates, type, objectInfo)
         {
             this.text = text;

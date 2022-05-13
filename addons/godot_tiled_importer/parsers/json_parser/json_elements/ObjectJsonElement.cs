@@ -26,7 +26,7 @@ namespace TiledImporter.Parsers
             get
             {
                 return new Dictionary<string, ElementaryType>() {
-                // Standard object fields.
+                // Default object fields.
                 { "name", ElementaryType.String },
                 { "width", ElementaryType.Double },
                 { "height", ElementaryType.Double },
@@ -41,8 +41,8 @@ namespace TiledImporter.Parsers
                 { "ellipse", ElementaryType.Bool },
                 { "point", ElementaryType.Bool },
 
-                // Default object fields.
-                { "gid", ElementaryType.UInt }
+                // Tile object fields.
+                { "gid", ElementaryType.Object }
             };
             }
         }
@@ -137,7 +137,7 @@ namespace TiledImporter.Parsers
             return new TemplateObject(id, position, ObjectType.TemplateObject, template);
         }
 
-        private StandardObject FillToStandardObject(
+        private DefaultObject FillToStandardObject(
             int id,
             Point position,
             Dictionary<string, object> optionalElementaryTypeFields,
@@ -146,7 +146,7 @@ namespace TiledImporter.Parsers
             Godot.Collections.Dictionary elementDictionary
         )
         {
-            var objectInfo = new StandardObjectInfo();
+            var objectInfo = new DefaultObjectInfo();
             objectInfo.name = (string)optionalElementaryTypeFields["name"];
             objectInfo.width = (double)optionalElementaryTypeFields["width"];
             objectInfo.height = (double)optionalElementaryTypeFields["height"];
@@ -236,7 +236,7 @@ namespace TiledImporter.Parsers
             int id,
             Point position,
             ObjectType type,
-            StandardObjectInfo objectInfo,
+            DefaultObjectInfo objectInfo,
             Dictionary<string, object[]> optionalArrayFields,
             Godot.Collections.Dictionary elementDictionary
             )
@@ -303,7 +303,7 @@ namespace TiledImporter.Parsers
             int id,
             Point position,
             ObjectType type,
-            StandardObjectInfo objectInfo,
+            DefaultObjectInfo objectInfo,
             Godot.Collections.Dictionary elementDictionary)
         {
             ShapeObjectType? shapeObjectType = DetermineShapeObjectType(elementDictionary);
@@ -337,33 +337,33 @@ namespace TiledImporter.Parsers
             }
         }
 
-        private DefaultObject FillToDefaultObject(
+        private TileObject FillToDefaultObject(
             int id,
             Point position,
             ObjectType type,
-            StandardObjectInfo objectInfo,
+            DefaultObjectInfo objectInfo,
             Dictionary<string, object> optionalElementaryTypeFields,
             Dictionary<string, object[]> optionalArrayFields
             )
         {
-            uint? gID = (uint?)optionalElementaryTypeFields["gid"];
+            /*uint? gID = (uint?)optionalElementaryTypeFields["gid"];
             if (gID == null)
             {
                 GD.PushError("Parsed gid of the default object is null!");
                 return null;
-            }
+            }*/
 
             Property[] properties = null;
             object[] boxedProperties = optionalArrayFields["properties"];
             if (boxedProperties != null)
                 properties = Array.ConvertAll(optionalArrayFields["properties"], property => (Property)property);
 
-            return new DefaultObject(
+            return new TileObject(
                 id,
                 position,
                 type,
                 objectInfo,
-                gID ?? 0u,
+                Convert.ToUInt32(optionalElementaryTypeFields["gid"]),
                 properties);
         }
 
@@ -371,7 +371,7 @@ namespace TiledImporter.Parsers
             int id,
             Point position,
             ObjectType type,
-            StandardObjectInfo objectInfo,
+            DefaultObjectInfo objectInfo,
             Dictionary<string, object> optionalFields
         )
         {

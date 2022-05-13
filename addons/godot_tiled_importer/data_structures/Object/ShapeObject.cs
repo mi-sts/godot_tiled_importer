@@ -8,7 +8,7 @@ namespace TiledImporter.Structures
         Ellipse, Rectangle, Point
     }
 
-    public class ShapeObject : StandardObject
+    public class ShapeObject : DefaultObject
     {
         public ShapeObjectType shapeType { get; private set; }
 
@@ -16,7 +16,7 @@ namespace TiledImporter.Structures
             int id,
             Point coordinates,
             ObjectType type,
-            StandardObjectInfo objectInfo,
+            DefaultObjectInfo objectInfo,
             ShapeObjectType shapeType
             ) : base(id, coordinates, type, objectInfo)
         {

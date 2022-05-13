@@ -47,7 +47,7 @@ public static class ParserUtils
                 GD.PushError("Parsing value is out of the range of uint!");
             }
         }
-
+        
         return converted;
     }
 

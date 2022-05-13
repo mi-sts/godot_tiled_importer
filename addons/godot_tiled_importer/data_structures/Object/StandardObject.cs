@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace TiledImporter.Structures
 {
-    public struct StandardObjectInfo
+    public struct DefaultObjectInfo
     {
         public string name;
         public double? width;
@@ -16,7 +16,7 @@ namespace TiledImporter.Structures
         public bool? visible;
     }
 
-    public abstract class StandardObject : Object
+    public abstract class DefaultObject : Object
     {
         public string name { get; private set; } 
         public double width { get; private set; } 
@@ -25,11 +25,11 @@ namespace TiledImporter.Structures
         public string type { get; private set; } 
         public bool visible { get; private set; }
 
-        public StandardObject(
+        public DefaultObject(
             int id,
             Point coordinates,
             ObjectType objectType,
-            StandardObjectInfo objectInfo
+            DefaultObjectInfo objectInfo
             ) : base(id, coordinates, objectType)
         {
             var requiredFields = new object[] {

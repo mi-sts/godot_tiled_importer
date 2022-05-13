@@ -30,13 +30,13 @@ namespace TiledImporter.Structures
 
         // Hexagonal tile constructor.
         public TileData(
-            uint GID, IntPoint position, bool horizontallyFlipped, bool verticalFlipped, bool rotated60, bool rotated120
+            uint GID, IntPoint position, bool horizontallyFlipped, bool verticallyFlipped, bool rotated60, bool rotated120
             )
         {
             this.gID = GID;
             this.position = position;
             this.horizontallyFlipped = horizontallyFlipped;
-            this.verticallyFlipped = verticalFlipped;
+            this.verticallyFlipped = verticallyFlipped;
             this.diagonallyFlipped = rotated60;
             this.rotated120 = rotated120;
         }

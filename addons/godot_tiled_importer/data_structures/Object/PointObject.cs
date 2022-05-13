@@ -8,7 +8,7 @@ namespace TiledImporter.Structures
         Polygon, Polyline
     }
 
-    public class PointObject : StandardObject
+    public class PointObject : DefaultObject
     {
         public Point[] points { get; private set; }
         public PointObjectType pointObjectType { get; private set; }
@@ -17,7 +17,7 @@ namespace TiledImporter.Structures
             int id,
             Point position,
             ObjectType type,
-            StandardObjectInfo objectInfo,
+            DefaultObjectInfo objectInfo,
             PointObjectType pointObjectType,
             Point[] points
             ) : base(id, position, type, objectInfo)

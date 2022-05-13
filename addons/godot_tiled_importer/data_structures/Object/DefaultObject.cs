@@ -3,21 +3,21 @@ using System;
 
 namespace TiledImporter.Structures
 {
-    public class DefaultObject : StandardObject
+    public class TileObject : DefaultObject
     {
-        public uint gID { get; private set; }
+        public TileData objectTileData { get; private set; }
         public Property[] properties { get; private set; }
 
-        public DefaultObject(
+        public TileObject(
             int id,
             Point position,
             ObjectType type,
-            StandardObjectInfo objectInfo,
+            DefaultObjectInfo objectInfo,
             uint gID,
             Property[] properties
             ) : base(id, position, type, objectInfo)
         {
-            this.gID = gID;
+            this.objectTileData = Decoders.Decoder.DecodeGID(gID);
             this.properties = properties ?? new Property[0];
         }
     }
