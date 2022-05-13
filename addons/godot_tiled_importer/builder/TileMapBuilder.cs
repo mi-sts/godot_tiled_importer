@@ -25,7 +25,7 @@ public class TileMapBuilder
         rootNode.Name = sceneName;
         
         var packedScene = new PackedScene();
-        var mapTileSet = CreateMapTileSet(mapData.tileSets);
+        var mapTileSet = CreateMapTileSet(mapData.tileSets, mapData.mapOrientation);
         Godot.Node2D layerParentNode = null;
 
         foreach (Structures.Layer layerData in mapData.layers) {
@@ -148,10 +148,13 @@ public class TileMapBuilder
         }
     }
 
-    private Godot.TileSet CreateMapTileSet(Structures.TileSet[] tileSetsData) {
+    private Godot.TileSet CreateMapTileSet(
+        Structures.TileSet[] tileSetsData, 
+        Structures.MapOrientation mapOrientation
+        ) {
         var tileSet = new Godot.TileSet();
         foreach (Structures.TileSet tileSetData in tileSetsData) {
-            AddTilesToTileSetNode(tileSet, tileSetData);
+            AddTilesToTileSetNode(tileSet, tileSetData, mapOrientation);
         }
 
         return tileSet;
@@ -204,7 +207,6 @@ public class TileMapBuilder
         Structures.Map mapData
     ) {
         int staggerRemainder = mapData.staggerIndex == Structures.StaggerIndex.Odd ? 1 : 0;
-        var initialOffset = Vector2.Up * 0.5f;
         foreach (Structures.TileData tileData in chunkData.tiles) {
             if (tileData.gID == 0)
                 continue;
@@ -227,9 +229,9 @@ public class TileMapBuilder
                 staggerOffsetVector = new Vector2(0.5f, 0f);
 
             var spriteTilePosition = new Vector2(
-                (initialOffset.x + chunkPosition.x + tileData.position.x + staggerOffsetVector.x) * 
+                (chunkPosition.x + tileData.position.x + staggerOffsetVector.x) * 
                     axesFactorVector.x * mapData.tileWidth,
-                (initialOffset.y + chunkPosition.y + tileData.position.y + staggerOffsetVector.y) * 
+                (chunkPosition.y + tileData.position.y + staggerOffsetVector.y) * 
                     axesFactorVector.y * mapData.tileHeight
             );
 
@@ -313,15 +315,16 @@ public class TileMapBuilder
 
     private void AddTilesToTileSetNode(
         Godot.TileSet tileSetNode, 
-        Structures.TileSet tileSetData
+        Structures.TileSet tileSetData,
+        Structures.MapOrientation mapOrientation
         )
     {        
         switch (tileSetData.type) {
             case Structures.TileSetType.SingleImageTileSet:
-                AddAtlasToTileSetNode(tileSetNode, tileSetData);
+                AddAtlasToTileSetNode(tileSetNode, tileSetData, mapOrientation);
                 break;
             case Structures.TileSetType.MultupleImagesTileSet:
-                AddSingleTilesToTileSetNode(tileSetNode, tileSetData);
+                AddSingleTilesToTileSetNode(tileSetNode, tileSetData, mapOrientation);
                 break;
             default:
                 GD.PushError("Not determined tile set type!");
@@ -329,9 +332,14 @@ public class TileMapBuilder
         }
     }
 
+    private bool IsMapIsometric(Structures.MapOrientation orientation) =>
+        orientation == Structures.MapOrientation.Isometric ||
+        orientation == Structures.MapOrientation.Staggered; 
+
     private void AddSingleTilesToTileSetNode(
         Godot.TileSet tileSetNode,
-        Structures.TileSet tileSetData        
+        Structures.TileSet tileSetData,
+        Structures.MapOrientation mapOrientation       
         ) {
         uint firstGID = tileSetData.firstGID;
         for (int i = 0; i < tileSetData.tiles.Length; ++i) {
@@ -347,11 +355,12 @@ public class TileMapBuilder
             tileSetNode.TileSetTileMode(tileGID, TileSet.TileMode.SingleTile);
             tileSetNode.TileSetTexture(tileGID, tileTexture);
             tileSetNode.TileSetRegion(tileGID, new Rect2(0f, 0f, tileTexture.GetWidth(), tileTexture.GetHeight()));
+            bool isIsometric = IsMapIsometric(mapOrientation);
             tileSetNode.TileSetTextureOffset(
                 tileGID, 
                 new Vector2(
                     tileSetData.tileOffset?.x ?? 0, 
-                    -tileSetData.tileOffset?.y ?? 0 - tileSetData.tileHeight
+                    -tileSetData.tileOffset?.y ?? 0 - (isIsometric ? tileSetData.tileHeight : 0)
                     )
             );
             tileSetNode.TileSetName(tileGID, $"{tileSetData.name}_{tileData.id}");
@@ -362,7 +371,8 @@ public class TileMapBuilder
 
     private void AddAtlasToTileSetNode(
         Godot.TileSet tileSetNode,
-        Structures.TileSet tileSetData
+        Structures.TileSet tileSetData,
+        Structures.MapOrientation mapOrientation
         ) {
         int firstGID = (int)tileSetData.firstGID;
         var texturePath = $"res://{tileSetData.image}";
@@ -387,11 +397,12 @@ public class TileMapBuilder
         tileSetNode.AutotileSetSize(firstGID, new Vector2(tileSetData.tileWidth, tileSetData.tileHeight));
         tileSetNode.TileSetName(firstGID, tileSetData.name);
         tileSetNode.AutotileSetSpacing(firstGID, tileSetData.spacing);
+        bool isMapIsometric = IsMapIsometric(mapOrientation);
         tileSetNode.TileSetTextureOffset(
             firstGID, 
             new Vector2(
                 tileSetData.tileOffset?.x ?? 0, 
-                -tileSetData.tileOffset?.y ?? 0 - tileSetData.tileHeight
+                -tileSetData.tileOffset?.y ?? 0 - (isMapIsometric ? tileSetData.tileHeight : 0)
                 )
         );
 
