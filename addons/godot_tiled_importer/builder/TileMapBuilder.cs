@@ -347,7 +347,10 @@ public class TileMapBuilder
             tileSetNode.TileSetRegion(tileGID, new Rect2(0f, 0f, tileTexture.GetWidth(), tileTexture.GetHeight()));
             tileSetNode.TileSetTextureOffset(
                 tileGID, 
-                new Vector2(tileSetData.tileOffset?.x ?? 0, tileSetData.tileOffset?.y ?? 0)
+                new Vector2(
+                    tileSetData.tileOffset?.x ?? 0 - tileSetData.tileWidth, 
+                    tileSetData.tileOffset?.y ?? 0 - tileSetData.tileHeight
+                    )
             );
             tileSetNode.TileSetName(tileGID, $"{tileSetData.name}_{tileData.id}");
             singleTileGIDs.Add(tileGID);
@@ -382,6 +385,13 @@ public class TileMapBuilder
         tileSetNode.AutotileSetSize(firstGID, new Vector2(tileSetData.tileWidth, tileSetData.tileHeight));
         tileSetNode.TileSetName(firstGID, tileSetData.name);
         tileSetNode.AutotileSetSpacing(firstGID, tileSetData.spacing);
+        tileSetNode.TileSetTextureOffset(
+            firstGID, 
+            new Vector2(
+                tileSetData.tileOffset?.x ?? 0 - tileSetData.tileWidth, 
+                tileSetData.tileOffset?.y ?? 0 - tileSetData.tileHeight
+                )
+        );
 
         atlasFirstTileGIDs.Add(firstGID);
         atlasFirstTileGIDsSet.Add(firstGID);
