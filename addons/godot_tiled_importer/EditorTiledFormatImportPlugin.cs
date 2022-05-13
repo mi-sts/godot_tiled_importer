@@ -6,7 +6,7 @@ using TiledImporter.MapBuilder;
 using TiledImporter.Structures;
 
 public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
-{/*
+{
     public override string GetImporterName() => "mi-sts.godot_tiled_importer";
 
     public override string GetVisibleName() => "Tiled Map";
@@ -61,5 +61,5 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
         string[] directories = filePath.Split("/");
         string fileWithExtension = directories[directories.Length - 1];
         return fileWithExtension.Split(".")[0];
-    }*/
+    }
 }
