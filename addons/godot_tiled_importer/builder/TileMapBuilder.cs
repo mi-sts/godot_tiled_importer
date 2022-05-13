@@ -112,6 +112,7 @@ public class TileMapBuilder
                     mapTileSet,
                     objectLayerParentNode,
                     rootNode,
+                    true,
                     new Vector2((float)tileObjectData.width, (float)tileObjectData.height)
                 );
             }
@@ -203,7 +204,7 @@ public class TileMapBuilder
         Structures.Map mapData
     ) {
         int staggerRemainder = mapData.staggerIndex == Structures.StaggerIndex.Odd ? 1 : 0;
-        var initialOffset = Vector2.One * 0.5f;
+        var initialOffset = Vector2.Up * 0.5f;
         foreach (Structures.TileData tileData in chunkData.tiles) {
             if (tileData.gID == 0)
                 continue;
@@ -254,6 +255,7 @@ public class TileMapBuilder
         Godot.TileSet mapTileSet,
         Godot.Node2D spriteParentNode,
         Godot.Node2D rootNode,
+        bool isObjectLayerSpriteTile = false,
         Vector2? spriteSize = null
         ) {
         var spriteTile = new Godot.Sprite();
@@ -264,7 +266,7 @@ public class TileMapBuilder
 
         if (singleTileGIDsSet.Contains((int)tileGID)) { // If drawing tile is a sigle tile.
             spriteTile.Texture = mapTileSet.TileGetTexture((int)tileGID);
-        } else if (atlasFirstTileGIDsSet.Contains((int)tileGID)) {                                       // If drawing tile is an atlas tile.
+        } else {                                       // If drawing tile is an atlas tile.
             spriteTile.RegionEnabled = true;     
             int atlasFirstGID = FindAtlasFirstGID(tileGID);
             int atlasTileLocalID = (int)tileGID - atlasFirstGID;
@@ -280,7 +282,7 @@ public class TileMapBuilder
             spriteTile.Texture = mapTileSet.TileGetTexture((int)atlasFirstGID);
         }
 
-        if (spriteTile.Texture != null) {
+        if (spriteTile.Texture != null && isObjectLayerSpriteTile) {
             spriteTile.Offset = new Vector2(spriteTile.Offset.x, -spriteTile.Texture.GetSize().y);
             if (spriteSize != null && spriteTile.Texture != null) {
                 var spriteScale = new Vector2(
