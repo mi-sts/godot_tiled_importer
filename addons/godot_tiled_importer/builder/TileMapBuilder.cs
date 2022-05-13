@@ -14,7 +14,7 @@ public class TileMapBuilder
 
     private Dictionary<int, int> atlasesWidth = new Dictionary<int, int>(); // key - atlas first GID, value - number of columns in the atlas. 
 
-    public PackedScene GenerateTileMapScene(Structures.Map mapData)
+    public PackedScene GenerateTileMapScene(string sceneName, Structures.Map mapData)
     {
         if (mapData == null) {
             GD.PushError("Data of the generating map is null!");
@@ -22,15 +22,17 @@ public class TileMapBuilder
         }
 
         var rootNode = new Godot.Node2D();
+        rootNode.Name = sceneName;
+        
         var packedScene = new PackedScene();
         var mapTileSet = CreateMapTileSet(mapData.tileSets);
         Godot.Node2D layerParentNode = null;
 
         foreach (Structures.Layer layerData in mapData.layers) {
             if (layerData is Structures.TileLayer tileLayerData) {
-                BuildTileLayer(tileLayerData, mapData, mapTileSet, layerParentNode, rootNode);
+                layerParentNode = BuildTileLayer(tileLayerData, mapData, mapTileSet, rootNode);
             } else if (layerData is Structures.ObjectGroupLayer objectLayerData) {
-                BuildObjectGroupLayer(objectLayerData, mapTileSet, layerParentNode, rootNode);
+                layerParentNode = BuildObjectGroupLayer(objectLayerData, mapTileSet, rootNode);
             }
             layerParentNode.Modulate = new Color(layerData.tintColor ?? new Color(1, 1, 1), (float)layerData.opacity);
             layerParentNode.Name = layerData.name;
@@ -40,17 +42,15 @@ public class TileMapBuilder
         return packedScene;
     }
 
-    private void BuildTileLayer(
+    private Godot.Node2D BuildTileLayer(
         Structures.TileLayer tileLayerData,
         Structures.Map mapData,
         Godot.TileSet mapTileSet,
-        Godot.Node2D layerParentNode,
         Godot.Node2D rootNode
         ) {
         switch (mapData.mapOrientation) {
             case Structures.MapOrientation.Hexagonal:
                 var tileLayerParentNode = new Godot.Node2D();
-                layerParentNode = tileLayerParentNode;
                 rootNode.AddChild(tileLayerParentNode);
                 tileLayerParentNode.Owner = rootNode;
 
@@ -68,10 +68,9 @@ public class TileMapBuilder
                     );
                 }
                 
-                break;
+                return tileLayerParentNode;
             default:
                 var layerMapNode = new Godot.TileMap();
-                layerParentNode = layerMapNode;
                 layerMapNode.Mode = ConvertMapOrientationToMapMode(mapData.mapOrientation);
                 layerMapNode.CellSize = new Vector2(mapData.tileWidth, mapData.tileHeight);
                 layerMapNode.TileSet = mapTileSet;
@@ -85,18 +84,16 @@ public class TileMapBuilder
                 else
                     DrawChunk(tileLayerData.data, Structures.IntPoint.Zero, layerMapNode);
                 
-                break;
+                return layerMapNode;
         }
     }
 
-    private void BuildObjectGroupLayer(
+    private Godot.Node2D BuildObjectGroupLayer(
         Structures.ObjectGroupLayer objectLayerData,
         Godot.TileSet mapTileSet,
-        Godot.Node2D layerParentNode,
         Godot.Node2D rootNode
     ) {
         var objectLayerParentNode = new Godot.Node2D();
-        layerParentNode = objectLayerParentNode;
         rootNode.AddChild(objectLayerParentNode);
         objectLayerParentNode.Owner = rootNode;
         Structures.Object[] orderedObjects = 
@@ -119,6 +116,8 @@ public class TileMapBuilder
                 );
             }
         }
+
+        return objectLayerParentNode;
     }
     
     private Structures.Object[] GetObjectsOrderedByDrawOrder(Structures.Object[] objects, Structures.DrawOrder drawOrder) {
@@ -257,7 +256,6 @@ public class TileMapBuilder
         Godot.Node2D rootNode,
         Vector2? spriteSize = null
         ) {
-        GD.Print(tileGID);
         var spriteTile = new Godot.Sprite();
         spriteTile.RotationDegrees = rotation;
         spriteTile.FlipH = horizontallyFlipped;

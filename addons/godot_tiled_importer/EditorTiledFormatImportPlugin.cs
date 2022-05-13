@@ -14,18 +14,29 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
     public override Godot.Collections.Array GetRecognizedExtensions() => 
         new Godot.Collections.Array(new string[] {"tmj"});
 
-    public override string GetResourceType() => "TileMap";
+    public override string GetResourceType() => "PackedScene";
+
+    public override string GetSaveExtension() => "tscn";
+
+    public override int GetPresetCount() => 0;
+
+    public override Godot.Collections.Array GetImportOptions(int preset) => new Godot.Collections.Array();
 
     public override int Import(
-        string sourceFile, 
-        string savePath, 
+        string sourceFilePath, 
+        string saveFilePath, 
         Dictionary options, 
         Godot.Collections.Array platformVariants, 
         Godot.Collections.Array genFiles
         )
     {
+        sourceFilePath = GodotProjectPathToRelative(sourceFilePath);
+        saveFilePath = GodotProjectPathToRelative(saveFilePath);
+
+        GD.Print(sourceFilePath);
+
         var tiledMapFile = new Godot.File();
-        tiledMapFile.Open(sourceFile, File.ModeFlags.Read);
+        tiledMapFile.Open(sourceFilePath, File.ModeFlags.Read);
         var tiledMapData = tiledMapFile.GetAsText();
         tiledMapFile.Close();
 
@@ -33,8 +44,22 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
         TiledImporter.Structures.Map map = tiledMapJsonParser.Parse(tiledMapData);
 
         var tileMapBuilder = new TileMapBuilder();
-        PackedScene mapScene = tileMapBuilder.GenerateTileMapScene(map);
+        string mapName = GetFileNameFromPath(sourceFilePath);
+        PackedScene mapScene = tileMapBuilder.GenerateTileMapScene(mapName, map);
 
-        return (int)ResourceSaver.Save(savePath, mapScene);
+        return (int)ResourceSaver.Save($"{saveFilePath}.{GetSaveExtension()}", mapScene);
+    }
+
+    private string GodotProjectPathToRelative(string godotProjectPath) {
+        if (godotProjectPath.Length >= 6 && godotProjectPath.Substring(0, 6) == "res://") 
+            return godotProjectPath.Substring(6);
+        else 
+            return null;
+    }
+
+    private string GetFileNameFromPath(string filePath) {
+        string[] directories = filePath.Split("/");
+        string fileWithExtension = directories[directories.Length - 1];
+        return fileWithExtension.Split(".")[0];
     }
 }
