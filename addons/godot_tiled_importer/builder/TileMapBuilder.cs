@@ -348,8 +348,8 @@ public class TileMapBuilder
             tileSetNode.TileSetTextureOffset(
                 tileGID, 
                 new Vector2(
-                    tileSetData.tileOffset?.x ?? 0 - tileSetData.tileWidth, 
-                    tileSetData.tileOffset?.y ?? 0 - tileSetData.tileHeight
+                    tileSetData.tileOffset?.x ?? 0, 
+                    -tileSetData.tileOffset?.y ?? 0 - tileSetData.tileHeight
                     )
             );
             tileSetNode.TileSetName(tileGID, $"{tileSetData.name}_{tileData.id}");
@@ -388,8 +388,8 @@ public class TileMapBuilder
         tileSetNode.TileSetTextureOffset(
             firstGID, 
             new Vector2(
-                tileSetData.tileOffset?.x ?? 0 - tileSetData.tileWidth, 
-                tileSetData.tileOffset?.y ?? 0 - tileSetData.tileHeight
+                tileSetData.tileOffset?.x ?? 0, 
+                -tileSetData.tileOffset?.y ?? 0 - tileSetData.tileHeight
                 )
         );
 
