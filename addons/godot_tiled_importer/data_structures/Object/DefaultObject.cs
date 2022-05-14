@@ -1,22 +1,24 @@
 using Godot;
 using System;
 
-public class DefaultObject : StandardObject {
-    public uint gID { get; private set; }
-    public Property[] properties { get; private set; }
+namespace TiledImporter.Structures
+{
+    public class TileObject : DefaultObject
+    {
+        public TileData objectTileData { get; private set; }
+        public Property[] properties { get; private set; }
 
-    public DefaultObject(
-        int id, 
-        Point position, 
-        ObjectType type, 
-        StandardObjectInfo objectInfo, 
-        uint gID, 
-        Property[] properties
-        ) : base(id, position, type, objectInfo) {
-        if (properties == null) {
-            GD.PushError("Properties of the default object are not initialized!");
+        public TileObject(
+            int id,
+            Point position,
+            ObjectType type,
+            DefaultObjectInfo objectInfo,
+            uint gID,
+            Property[] properties
+            ) : base(id, position, type, objectInfo)
+        {
+            this.objectTileData = Decoders.Decoder.DecodeGID(gID);
+            this.properties = properties ?? new Property[0];
         }
-        this.gID = gID;
-        this.properties = properties ?? new Property[0];
     }
 }
