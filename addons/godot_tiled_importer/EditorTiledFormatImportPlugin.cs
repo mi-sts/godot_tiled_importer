@@ -33,8 +33,6 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
         sourceFilePath = GodotProjectPathToRelative(sourceFilePath);
         saveFilePath = GodotProjectPathToRelative(saveFilePath);
 
-        GD.Print(sourceFilePath);
-
         var tiledMapFile = new Godot.File();
         tiledMapFile.Open(sourceFilePath, File.ModeFlags.Read);
         var tiledMapData = tiledMapFile.GetAsText();
