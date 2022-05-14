@@ -13,3 +13,4 @@ project.godot
 *.sln
 .vs/
 omnisharp.json
+*.csproj
