@@ -79,10 +79,10 @@ public class TileMapBuilder
                 
                 if (tileLayerData.tileLayerType == Structures.TileLayerType.Infinite)
                     foreach (Structures.Chunk chunk in tileLayerData.chunks) {
-                        DrawChunk(chunk.data, chunk.position, layerMapNode);
+                        DrawChunk(chunk.data, chunk.position, layerMapNode, mapData.mapOrientation);
                     }
                 else
-                    DrawChunk(tileLayerData.data, Structures.IntPoint.Zero, layerMapNode);
+                    DrawChunk(tileLayerData.data, Structures.IntPoint.Zero, layerMapNode, mapData.mapOrientation);
                 
                 return layerMapNode;
         }
@@ -163,16 +163,26 @@ public class TileMapBuilder
     private void DrawChunk(
         Structures.TileLayerData chunkData,
         Structures.IntPoint chunkPosition,
-        Godot.TileMap mapNode
+        Godot.TileMap mapNode,
+        Structures.MapOrientation mapOrientation
         ) {
         foreach (Structures.TileData tileData in chunkData.tiles) {
             if (tileData.gID == 0)
                 continue;
 
+            var position = new Structures.IntPoint(
+                chunkPosition.x + tileData.position.x, 
+                chunkPosition.y + tileData.position.y
+            );
+
+            if (mapOrientation == Structures.MapOrientation.Staggered) {
+                position = StaggeredIsometricToIsometricCoordinates(position);
+            }
+
             if (singleTileGIDsSet.Contains((int)tileData.gID)) { // If drawing tile is a sigle tile.
                 mapNode.SetCell(
-                    chunkPosition.x + tileData.position.x, 
-                    chunkPosition.y + tileData.position.y,
+                    position.x, 
+                    position.y,
                     (int)tileData.gID,
                     tileData.horizontallyFlipped,
                     tileData.verticallyFlipped,
@@ -186,8 +196,8 @@ public class TileMapBuilder
                 int tileXIndex = atlasTileLocalID % atlasWidth;
                 int tileYIndex = atlasTileLocalID / atlasWidth;
                 mapNode.SetCell(
-                    chunkPosition.x + tileData.position.x, 
-                    chunkPosition.y + tileData.position.y,
+                    position.x, 
+                    position.y,
                     (int)atlasFirstGID,
                     tileData.horizontallyFlipped,
                     tileData.verticallyFlipped,
@@ -409,6 +419,13 @@ public class TileMapBuilder
         atlasFirstTileGIDs.Add(firstGID);
         atlasFirstTileGIDsSet.Add(firstGID);
         atlasesWidth.Add(firstGID, tileSetData.columns);
+    }
+    
+    public static Structures.IntPoint StaggeredIsometricToIsometricCoordinates(Structures.IntPoint coordinates) {
+        int xCoordinate = coordinates.y + coordinates.x - coordinates.y / 2;
+        int yCoordinate = coordinates.y - xCoordinate;
+        
+        return new Structures.IntPoint(xCoordinate, yCoordinate);
     }
 }
 }
