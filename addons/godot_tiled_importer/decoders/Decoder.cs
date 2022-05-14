@@ -70,7 +70,8 @@ namespace TiledImporter.Decoders
             return new TileLayerData(tiles, layerWidth, layerHeight);
         }
 
-        public static TileData DecodeGID(uint tileID) {
+        public static TileData DecodeGID(uint tileID)
+        {
             bool[] tileFlags = DecodeFlipFlags(tileID);
             ClearFlipFlagsBits(ref tileID);
             bool horizontallyFlipped = tileFlags[0];
@@ -79,11 +80,11 @@ namespace TiledImporter.Decoders
             bool rotated120 = tileFlags[3];
 
             return new TileData(
-                tileID, 
-                IntPoint.Zero, 
-                horizontallyFlipped, 
+                tileID,
+                IntPoint.Zero,
+                horizontallyFlipped,
                 verticallyFlipped,
-                diagonallyFlipped, 
+                diagonallyFlipped,
                 rotated120
                 );
         }

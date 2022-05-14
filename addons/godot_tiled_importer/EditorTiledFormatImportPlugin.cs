@@ -11,8 +11,8 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
 
     public override string GetVisibleName() => "Tiled Map";
 
-    public override Godot.Collections.Array GetRecognizedExtensions() => 
-        new Godot.Collections.Array(new string[] {"tmj"});
+    public override Godot.Collections.Array GetRecognizedExtensions() =>
+        new Godot.Collections.Array(new string[] { "tmj" });
 
     public override string GetResourceType() => "PackedScene";
 
@@ -23,10 +23,10 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
     public override Godot.Collections.Array GetImportOptions(int preset) => new Godot.Collections.Array();
 
     public override int Import(
-        string sourceFilePath, 
-        string saveFilePath, 
-        Dictionary options, 
-        Godot.Collections.Array platformVariants, 
+        string sourceFilePath,
+        string saveFilePath,
+        Dictionary options,
+        Godot.Collections.Array platformVariants,
         Godot.Collections.Array genFiles
         )
     {
@@ -48,14 +48,16 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
         return (int)ResourceSaver.Save($"{saveFilePath}.{GetSaveExtension()}", mapScene);
     }
 
-    private string GodotProjectPathToRelative(string godotProjectPath) {
-        if (godotProjectPath.Length >= 6 && godotProjectPath.Substring(0, 6) == "res://") 
+    private string GodotProjectPathToRelative(string godotProjectPath)
+    {
+        if (godotProjectPath.Length >= 6 && godotProjectPath.Substring(0, 6) == "res://")
             return godotProjectPath.Substring(6);
-        else 
+        else
             return null;
     }
 
-    private string GetFileNameFromPath(string filePath) {
+    private string GetFileNameFromPath(string filePath)
+    {
         string[] directories = filePath.Split("/");
         string fileWithExtension = directories[directories.Length - 1];
         return fileWithExtension.Split(".")[0];

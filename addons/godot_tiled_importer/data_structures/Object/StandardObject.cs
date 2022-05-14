@@ -18,11 +18,11 @@ namespace TiledImporter.Structures
 
     public abstract class DefaultObject : Object
     {
-        public string name { get; private set; } 
-        public double width { get; private set; } 
+        public string name { get; private set; }
+        public double width { get; private set; }
         public double height { get; private set; }
         public double rotation { get; private set; }
-        public string type { get; private set; } 
+        public string type { get; private set; }
         public bool visible { get; private set; }
 
         public DefaultObject(

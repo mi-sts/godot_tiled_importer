@@ -3,7 +3,8 @@ using System;
 
 namespace TiledImporter.Structures
 {
-    public enum TileLayerType {
+    public enum TileLayerType
+    {
         Infinite, NotInfinite
     }
 
