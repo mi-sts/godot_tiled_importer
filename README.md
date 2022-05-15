@@ -1,6 +1,8 @@
 # Godot Tiled importer (Mono version).
-Importer of tile maps from the Tiled editor to the Godot game engine.
-Plugin is written in C#, so it can only be used in the Mono version of the Godot engine. 
+
+***Plugin is written in C#, so it can only be used in the Mono version of the Godot engine.***
+
+Plugin for Godot that helps to import tile maps from the Tiled editor.
 
 ## What types of maps does the plugin support?
 The plugin supports all types of maps available in Tiled, namely:
