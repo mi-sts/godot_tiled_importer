@@ -15,14 +15,16 @@ namespace TiledImporter.MapBuilder
 
         private Dictionary<int, int> atlasesWidth = new Dictionary<int, int>(); // key - atlas first GID, value - number of columns in the atlas. 
 
-        public PackedScene GenerateTileMapScene(string sceneName, Structures.Map mapData)
+        private string mapFileDirectoryPath = "";
+
+        public PackedScene GenerateTileMapScene(string sceneName, Structures.Map mapData, string mapFileDirectoryPath)
         {
             if (mapData == null)
             {
                 GD.PushError("Data of the generating map is null!");
                 return null;
             }
-
+            this.mapFileDirectoryPath = mapFileDirectoryPath;
             var rootNode = new Godot.Node2D();
             rootNode.Name = sceneName;
 
@@ -391,7 +393,7 @@ namespace TiledImporter.MapBuilder
             for (int i = 0; i < tileSetData.tiles.Length; ++i)
             {
                 Structures.Tile tileData = tileSetData.tiles[i];
-                var tilePath = $"res://{tileData.image}";
+                var tilePath = $"res://{mapFileDirectoryPath}{tileData.image}";
                 var tileTexture = Godot.ResourceLoader.Load(tilePath) as Godot.Texture;
                 if (tileTexture == null)
                 {
@@ -424,7 +426,7 @@ namespace TiledImporter.MapBuilder
             )
         {
             int firstGID = (int)tileSetData.firstGID;
-            var texturePath = $"res://{tileSetData.image}";
+            var texturePath = $"res://{mapFileDirectoryPath}{tileSetData.image}";
             var texture = Godot.ResourceLoader.Load(texturePath) as Texture;
             if (texture == null)
             {

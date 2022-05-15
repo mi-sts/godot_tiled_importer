@@ -30,9 +30,6 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
         Godot.Collections.Array genFiles
         )
     {
-        sourceFilePath = GodotProjectPathToRelative(sourceFilePath);
-        saveFilePath = GodotProjectPathToRelative(saveFilePath);
-
         var tiledMapFile = new Godot.File();
         tiledMapFile.Open(sourceFilePath, File.ModeFlags.Read);
         var tiledMapData = tiledMapFile.GetAsText();
@@ -42,8 +39,10 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
         TiledImporter.Structures.Map map = tiledMapJsonParser.Parse(tiledMapData);
 
         var tileMapBuilder = new TileMapBuilder();
-        string mapName = GetFileNameFromPath(sourceFilePath);
-        PackedScene mapScene = tileMapBuilder.GenerateTileMapScene(mapName, map);
+        string relativeSourceFilePath = GodotProjectPathToRelative(sourceFilePath);
+        string mapName = GetFileNameFromPath(relativeSourceFilePath);
+        string sourceFileDirectoryPath = GetFileDirectoryFromPath(relativeSourceFilePath);
+        PackedScene mapScene = tileMapBuilder.GenerateTileMapScene(mapName, map, sourceFileDirectoryPath);
 
         return (int)ResourceSaver.Save($"{saveFilePath}.{GetSaveExtension()}", mapScene);
     }
@@ -56,10 +55,14 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
             return null;
     }
 
+    private string GetFileDirectoryFromPath(string filePath) {
+        int lastSlashIndex = filePath.LastIndexOf("/");
+        return filePath.Substring(0, lastSlashIndex + 1);
+    }
+
     private string GetFileNameFromPath(string filePath)
     {
-        string[] directories = filePath.Split("/");
-        string fileWithExtension = directories[directories.Length - 1];
-        return fileWithExtension.Split(".")[0];
+        int lastSlashIndex = filePath.LastIndexOf("/");
+        return filePath.Substring(lastSlashIndex);
     }
 }
