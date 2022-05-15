@@ -1,4 +1,4 @@
-# Godot Tiled importer (Mono version).
+# Godot Tiled importer (Mono version)
 
 ***Plugin is written in C#, so it can only be used in the Mono version of the Godot engine.***
 
