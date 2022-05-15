@@ -1,4 +1,4 @@
-#Plugin for importing tilemaps from the Tiled editor into the Godot game engine (Mono version).
+# Plugin for importing tilemaps from the Tiled editor into the Godot game engine (Mono version).
 
 # What types of maps does the plugin support?
 The plugin supports all types of maps available in Tiled, namely:
