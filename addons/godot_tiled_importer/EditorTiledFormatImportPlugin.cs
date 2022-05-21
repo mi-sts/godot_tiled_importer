@@ -56,12 +56,18 @@ public class EditorTiledMapFormatImportPlugin : EditorImportPlugin
     }
 
     private string GetFileDirectoryFromPath(string filePath) {
+        if (!filePath.Contains("/"))
+            return "";
+
         int lastSlashIndex = filePath.LastIndexOf("/");
         return filePath.Substring(0, lastSlashIndex + 1);
     }
 
     private string GetFileNameFromPath(string filePath)
     {
+        if (!filePath.Contains("/"))
+            return "";
+            
         int lastSlashIndex = filePath.LastIndexOf("/");
         return filePath.Substring(lastSlashIndex);
     }
